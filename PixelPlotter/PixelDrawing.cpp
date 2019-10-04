@@ -57,7 +57,12 @@ namespace PixelPlotter
 
 		int a = abs(X2 - X1);
 		int b = abs(Y2 - Y1);
-		int MaxDist = a - b;
+		int MaxDist;
+
+		if (a > b)
+			MaxDist = a;
+		else
+			MaxDist = b;
 
 		float XStep = (X2 - X1);
 		float YStep = (Y2 - Y1);
@@ -83,6 +88,26 @@ namespace PixelPlotter
 	void PixelPlotterForm::DrawPolygon(int Sides, int X, int Y, int R, Color PixelColour)
 	{
 		// Fill in the correct code here
+		float X2 = X;
+		float Y2 = Y - R;
+
+		float angle = (2 * PI) / Sides;
+
+		for (int i = 1; i <= Sides; i++)
+		{
+		
+			float X1 = X + R * sin(angle*i);
+			float Y1 = Y - R * cos(angle*i);
+
+			DrawLine(X1, Y1, X2, Y2, PixelColour);
+
+			X2 = X1;
+			Y2 = Y1;
+		}
+
+
+
+
 	}
 
 
@@ -98,6 +123,20 @@ namespace PixelPlotter
 	void PixelPlotterForm::DrawCircle(int X, int Y, int R, Color PixelColour)
 	{
 		// Fill in the correct code here
+
+		float X2 = X;
+		float Y2 = Y - R;
+
+		
+
+		for (int i = 1; i <= 360; i++)
+		{
+
+			float X1 = X + R * sin(i);
+			float Y1 = Y - R * cos(i);
+
+			SetViewportPixel(X1, Y1, PixelColour);
+		}
 	}
 
 
