@@ -55,12 +55,31 @@ namespace SpritePlotter
 // Copy given bitmap to position (X, Y) on the viewport. Read the note above regarding the ^ symbol
 void SpritePlotterForm::DrawBitmap( int X, int Y, Bitmap^ SrcBitmap )
 {
+	for (int x = 0; x < SrcBitmap->Width; x++)
+	{
+		for (int y = 0; y < SrcBitmap->Height; y++)
+		{
+			Color pixelColor = SrcBitmap->GetPixel(x, y);
+			SetViewportPixel(x+X, y+Y, pixelColor);
+		}
+	}
 }
 
 // Draw 'cutout' sprite to position (X,Y) on the viewport, using the alpha channel to
 // determine the cutout. If a pixel has a zero alpha then it should not be copied
 void SpritePlotterForm::DrawSprite( int X, int Y, Bitmap^ SrcBitmap )
 {
+	for (int x = 0; x < SrcBitmap->Width; x++)
+	{
+		for (int y = 0; y < SrcBitmap->Height; y++)
+		{
+			Color pixelColor = SrcBitmap->GetPixel(x, y);
+			if (pixelColor.A != 0)
+			{
+				SetViewportPixel(x + X, y + Y, pixelColor);
+			}
+		}
+	}
 }
 
 // Blend sprite onto position (X,Y) on the viewport, using the alpha channel as a blending factor
@@ -73,6 +92,22 @@ void SpritePlotterForm::DrawSprite( int X, int Y, Bitmap^ SrcBitmap )
 //           Color ResultColor = Color::FromArgb( R, G, B );
 void SpritePlotterForm::DrawSpriteAlpha( int X, int Y, Bitmap^ SrcBitmap )
 {
+for (int x = 0; x < SrcBitmap->Width; x++)
+{
+	for (int y = 0; y < SrcBitmap->Height; y++)
+	{
+		Color pixelColor = SrcBitmap->GetPixel(x, y);
+		
+		Color viewportColor = GetViewportPixel(x+X, y+Y);
+		int red = (pixelColor.R * pixelColor.A + viewportColor.R * (255 - pixelColor.A)) / 255;
+		int blue;
+		int green;
+		Color ResultColor = Color::FromArgb(red, green, blue);
+		SetViewportPixel(x + X, y + Y, ResultColor);
+		
+	}
+}
+	
 }
 
 // Special sprite blending techniques - see the worksheet
