@@ -100,8 +100,8 @@ for (int x = 0; x < SrcBitmap->Width; x++)
 		
 		Color viewportColor = GetViewportPixel(x+X, y+Y);
 		int red = (pixelColor.R * pixelColor.A + viewportColor.R * (255 - pixelColor.A)) / 255;
-		int blue;
-		int green;
+		int blue = (pixelColor.B * pixelColor.A + viewportColor.B * (255 - pixelColor.A)) / 255;
+		int green = (pixelColor.G * pixelColor.A + viewportColor.G * (255 - pixelColor.A)) / 255;
 		Color ResultColor = Color::FromArgb(red, green, blue);
 		SetViewportPixel(x + X, y + Y, ResultColor);
 		
@@ -113,14 +113,73 @@ for (int x = 0; x < SrcBitmap->Width; x++)
 // Special sprite blending techniques - see the worksheet
 void SpritePlotterForm::DrawSpriteAdd( int X, int Y, Bitmap^ SrcBitmap )
 {
+	for (int x = 0; x < SrcBitmap->Width; x++)
+	{
+		for (int y = 0; y < SrcBitmap->Height; y++)
+		{
+			Color pixelColor = SrcBitmap->GetPixel(x, y);
+
+			Color viewportColor = GetViewportPixel(x + X, y + Y);
+			int red = pixelColor.R + viewportColor.R;
+			int blue = pixelColor.B + viewportColor.B;
+			int green = pixelColor.G + viewportColor.G;
+			if (red > 255)
+			{
+				red = 255.0f;
+			}
+			if (blue > 255)
+			{
+				blue = 255.0f;
+			}
+			if (green > 255)
+			{
+				green = 255.0f;
+			}
+			Color ResultColor = Color::FromArgb(red, green, blue);
+			SetViewportPixel(x + X, y + Y, ResultColor);
+
+		}
+	}
 }
 
 void SpritePlotterForm::DrawSpriteMultiply( int X, int Y, Bitmap^ SrcBitmap )
 {
+	for (int x = 0; x < SrcBitmap->Width; x++)
+	{
+		for (int y = 0; y < SrcBitmap->Height; y++)
+		{
+			Color pixelColor = SrcBitmap->GetPixel(x, y);
+
+			Color viewportColor = GetViewportPixel(x + X, y + Y);
+			int red = pixelColor.R * viewportColor.R / 255;
+			int blue = pixelColor.B * viewportColor.B / 255;
+			int green = pixelColor.G * viewportColor.G / 255;
+			Color ResultColor = Color::FromArgb(red, green, blue);
+			SetViewportPixel(x + X, y + Y, ResultColor);
+
+		}
+	}
 }
 
 void SpritePlotterForm::DrawSpriteLuminosity( int X, int Y, Bitmap^ SrcBitmap )
 {
+
+	for (int x = 0; x < SrcBitmap->Width; x++)
+	{
+		for (int y = 0; y < SrcBitmap->Height; y++)
+		{
+			Color pixelColor = SrcBitmap->GetPixel(x, y);
+
+			Color viewportColor = GetViewportPixel(x + X, y + Y);
+			int red = (pixelColor.R * pixelColor.R + viewportColor.R * (255 - pixelColor.R)) / 255;
+			int blue = (pixelColor.B * pixelColor.B + viewportColor.B * (255 - pixelColor.B)) / 255;;
+			int green = (pixelColor.G * pixelColor.G + viewportColor.G * (255 - pixelColor.G)) / 255;;
+			Color ResultColor = Color::FromArgb(red, green, blue);
+			SetViewportPixel(x + X, y + Y, ResultColor);
+
+		}
+	}
+
 }
 
 
