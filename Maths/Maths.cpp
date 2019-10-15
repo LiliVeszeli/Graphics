@@ -86,14 +86,25 @@ int main()
 
 	Min(egert, erencia);*/ //dosent work if the floats are close to each other
 
-	float x1 = 123.5f;
+/*	float x1 = 123.5f;
 	float x2 = 12.0f;
 
 	float result = abs(x1-x2);
 	result = fmod(result, 32.0);
 	int rresult = result;
 
-	cout << rresult;
+	cout << rresult;*/ //rounds down from 15.5;
+
+/*	float result = sin(3.14/4);
+	cout << result;*/ // not accurate, more accurate with radians
+
+	double r = 3.0;
+	double volume = (4 / 3)*3.14*r*r*r;
+	cout << volume; //very not accurate
+
+
+
+
 
 
 
