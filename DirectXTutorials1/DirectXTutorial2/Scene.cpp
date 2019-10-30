@@ -75,7 +75,7 @@ bool InitScene()
     SimpleVertex vertices[] =
     {
         Vector3{ 0.0f,  0.5f, 0.5f},
-        Vector3{ 0.5f, -0.5f, 0.5f},
+        Vector3{ 0.0f, -0.5f, 0.5f},
         Vector3{-0.5f, -0.5f, 0.5f},
     };
     int numVertices = sizeof(vertices) / sizeof(SimpleVertex); // A count of the number of vertices in the array above
