@@ -77,9 +77,18 @@ bool InitScene()
         Vector3{ 0.0f,  0.5f, 0.5f},
         Vector3{ 0.0f, -0.5f, 0.5f},
         Vector3{-0.5f, -0.5f, 0.5f},
-    };
-    int numVertices = sizeof(vertices) / sizeof(SimpleVertex); // A count of the number of vertices in the array above
 
+	
+		Vector3{ 0.9f, 0.5f, 0.5f },
+		Vector3{ 0.9f, -0.5f, 0.5f },
+		Vector3{ 0.4f, -0.5f, 0.5f },
+    };
+
+	
+	
+	
+    int numVertices = sizeof(vertices) / sizeof(SimpleVertex); // A count of the number of vertices in the array above
+	//int numVertices2 = sizeof(vertices2) / sizeof(SimpleVertex);
 
     // Finally, create a "vertex buffer", an area of Direct3D controlled memory that will really hold the vertex data above. This buffer
     // is likely to be created in "GPU memory" for performance reasons. The vertex buffer will be initialised with the above array, but
@@ -93,6 +102,7 @@ bool InitScene()
     bufferDesc.MiscFlags = 0;
     D3D11_SUBRESOURCE_DATA initData; // Fill the new vertex buffer with the array above as initial data
     initData.pSysMem = vertices;
+	//initData.pSysMem = vertices2;
     if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &gVertexBuffer)))
     {
         return false;
@@ -170,7 +180,7 @@ void RenderScene()
 
 
     // 4) Draw 3 vertices, starting at vertex 0. This will draw a triangle using the vertex data and shaders selected
-    gD3DContext->Draw(3, 0);
+    gD3DContext->Draw(6, 0);
 
     //****
 
