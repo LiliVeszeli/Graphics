@@ -322,7 +322,7 @@ void UpdateScene(float frameTime)
     // Create a matrix to position the triangle - here it gets a Y-rotation matrix with the angle = time, so
     // it will rotate around the Y axis
     static float yRotation = 0;
-    gSceneConstants.worldMatrix = MatrixRotationX(yRotation) * MatrixRotationZ(yRotation);
+    gSceneConstants.worldMatrix = MatrixRotationX(yRotation) * MatrixRotationY(yRotation); //matrix multiplication so that it rotates around both axes
     yRotation += frameTime;
 
 
