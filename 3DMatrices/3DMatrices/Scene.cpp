@@ -30,6 +30,7 @@ ID3D11RasterizerState* gTwoSided; // This is used to make sure both sides of a t
 
 // The world matrix for the cube - this positions and orients the cube and is updated every frame
 CMatrix4x4 gCubeMatrix;
+CMatrix4x4 gCubeMatrix2;
 
 
 //--------------------------------------------------------------------------------------
@@ -318,6 +319,7 @@ void RenderScene()
     // - "memcpy" copies the C++ data over to the GPU's constant buffer
     // - "Unmap" closes the GPU's buffer again - we must do this as soon as possible
     gPerModelConstants.worldMatrix = gCubeMatrix;
+
     gD3DContext->Map(gPerModelConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
     memcpy(cb.pData, &gPerModelConstants, sizeof(gPerModelConstants));
     gD3DContext->Unmap(gPerModelConstantBuffer, 0);
@@ -330,6 +332,19 @@ void RenderScene()
     // Draw the cube, 36 vertices starting at vertex 0
     gD3DContext->Draw(36, 0);
 
+
+	gPerModelConstants.worldMatrix = gCubeMatrix2;
+	gD3DContext->Map(gPerModelConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+	memcpy(cb.pData, &gPerModelConstants, sizeof(gPerModelConstants));
+	gD3DContext->Unmap(gPerModelConstantBuffer, 0);
+
+	// Indicate that the constant buffer we just updated is for use in the vertex shader (VS)
+	// If you look at the vertex shader code, there is a structure with the same content that receives the data
+	// The first parameter must match constant buffer number in the shader, so this is constant buffer 0 on the vertex shader
+	gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
+
+																	   // Draw the cube, 36 vertices starting at vertex 0
+	gD3DContext->Draw(36, 0);
 
 
     //// Scene completion ////
@@ -348,13 +363,44 @@ void UpdateScene(float frameTime)
 {
     //// Update camera ////
 
+
+
     // Create a matrix to position the camera - called the view (camera) matrix - we'll see this in more detail later
-    gPerFrameConstants.viewMatrix = InverseAffine(MatrixTranslation(CVector3(0, 0, -5.0f)));
+    gPerFrameConstants.viewMatrix = InverseAffine(MatrixTranslation(CVector3 (0, 0, -5.0f)));
 
     // Create a "projection matrix" - this determines properties of the camera - again we'll see this later
     gPerFrameConstants.projectionMatrix = MakeProjectionMatrix(); // Using a helper function to make this special matrix
 
+	static float posx = 0.0f;
+	static float posy = 0.0f;
+	static float posz = -5.0f;
 
+	if (KeyHeld(Key_Up))
+	{
+		posy += 2.0f *frameTime;
+	}
+	if (KeyHeld(Key_Down))
+	{
+
+		posy -= 2.0f *frameTime;
+	}
+
+	//X
+	if (KeyHeld(Key_Right))
+	{
+
+		posx += 2.0f *frameTime;
+	}
+	if (KeyHeld(Key_Left))
+	{
+
+		posx -= 2.0f *frameTime;
+	}
+
+	CVector3 cameraPos = { posx, posy, posz };
+
+	gPerFrameConstants.viewMatrix = MatrixTranslation(cameraPos);
+	
 
     //// Update cube 1 ////
 
@@ -365,6 +411,7 @@ void UpdateScene(float frameTime)
 	static float rotationZ = 0;
 	static CVector3 scaleX = { 1.0f, 1.0f, 1.0f };
 	static CVector3 translate = { 0.0f, 0.0f, 0.0f };
+	static CVector3 position2 = { 0.0f, 0.0f, 10.0f }; //position of cube 2
 
     if (KeyHeld(Key_A))
     {
@@ -454,6 +501,7 @@ void UpdateScene(float frameTime)
 
 
 	gCubeMatrix = MatrixScaling(scaleX)* MatrixRotationZ(rotationZ)* MatrixRotationY(rotationY)* MatrixRotationX(rotationX)*MatrixTranslation(translate);
+	gCubeMatrix2 = MatrixTranslation(position2);
 
 
     // Show frame time / FPS in the window title //
