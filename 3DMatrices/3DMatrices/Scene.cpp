@@ -371,35 +371,37 @@ void UpdateScene(float frameTime)
     // Create a "projection matrix" - this determines properties of the camera - again we'll see this later
     gPerFrameConstants.projectionMatrix = MakeProjectionMatrix(); // Using a helper function to make this special matrix
 
+	
 	static float posx = 0.0f;
 	static float posy = 0.0f;
 	static float posz = -5.0f;
 
 	if (KeyHeld(Key_Up))
 	{
-		posy += 2.0f *frameTime;
+		posy -= 2.0f *frameTime;
 	}
 	if (KeyHeld(Key_Down))
 	{
 
-		posy -= 2.0f *frameTime;
+		posy += 2.0f *frameTime;
 	}
 
 	//X
 	if (KeyHeld(Key_Right))
 	{
 
-		posx += 2.0f *frameTime;
+		posx -= 2.0f *frameTime;
 	}
 	if (KeyHeld(Key_Left))
 	{
 
-		posx -= 2.0f *frameTime;
+		posx += 2.0f *frameTime;
 	}
 
 	CVector3 cameraPos = { posx, posy, posz };
 
-	gPerFrameConstants.viewMatrix = MatrixTranslation(cameraPos);
+	gPerFrameConstants.viewMatrix = MatrixTranslation(cameraPos); //only camera working for some reason.. 
+	
 	
 
     //// Update cube 1 ////
@@ -499,9 +501,14 @@ void UpdateScene(float frameTime)
 		translate.y -= 2.0f *frameTime;
 	}
 
+	
 
 	gCubeMatrix = MatrixScaling(scaleX)* MatrixRotationZ(rotationZ)* MatrixRotationY(rotationY)* MatrixRotationX(rotationX)*MatrixTranslation(translate);
 	gCubeMatrix2 = MatrixTranslation(position2);
+
+
+
+
 
 
     // Show frame time / FPS in the window title //
