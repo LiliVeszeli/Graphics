@@ -399,8 +399,6 @@ void UpdateScene(float frameTime)
 	}
 
 	CVector3 cameraPos = { posx, posy, posz };
-
-	gPerFrameConstants.viewMatrix = MatrixTranslation(cameraPos); //only camera working for some reason.. 
 	
 	
 
@@ -502,10 +500,10 @@ void UpdateScene(float frameTime)
 	}
 
 	
+	gPerFrameConstants.viewMatrix = MatrixTranslation(cameraPos); //only camera working for some reason.. 
 
 	gCubeMatrix = MatrixScaling(scaleX)* MatrixRotationZ(rotationZ)* MatrixRotationY(rotationY)* MatrixRotationX(rotationX)*MatrixTranslation(translate);
 	gCubeMatrix2 = MatrixTranslation(position2);
-
 
 
 
