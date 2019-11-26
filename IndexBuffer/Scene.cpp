@@ -153,17 +153,17 @@ DWORD gCubeIndices[] =
 	//2, 4, 5
 
 	0, 1, 2,
-	1, 2, 3,
+	1, 3, 2,
 	2, 3, 4,
-	3, 4, 5,
+	4, 3, 5,
 	4, 5, 6,
-	5, 6, 7,
+	6, 5, 7,
 	6, 7, 8,
-	7, 8, 9,
+	8, 7, 9,
 	8, 9, 10,
-	9, 10, 11,
+	9, 11, 10,
 	10, 11, 12,
-	11, 12, 13
+	12, 11, 13
 };
 int gCubeNumIndices = sizeof(gCubeIndices) / sizeof(gCubeIndices[0]);
 
@@ -257,7 +257,7 @@ bool InitScene()
     // We'll see states in more detail later
     D3D11_RASTERIZER_DESC rasteriserState = {};
     rasteriserState.FillMode = D3D11_FILL_SOLID;
-    rasteriserState.CullMode = D3D11_CULL_NONE;
+    rasteriserState.CullMode = D3D11_CULL_BACK;
     rasteriserState.DepthClipEnable = true;
     hr = gD3DDevice->CreateRasterizerState(&rasteriserState, &gTwoSided);
     if (FAILED(hr))
@@ -377,7 +377,7 @@ void RenderScene()
 
     //****NEW
     // Draw the geometry - but this week using an index buffer
-    gD3DContext->DrawIndexed(gCubeNumVertices, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
+    gD3DContext->DrawIndexed(36, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
 		                               // starting at the beginning of the index list (second parameter 0) and with
 		                               // no offset (third parameter 0 - an advanced topic)
     //****
@@ -410,24 +410,47 @@ void UpdateScene(float frameTime)
     //// Update cube 1 ////
 
     // Create a matrix to position and orientate the cube
-    static float rotationX = 0, rotationY = 0;
-    if (KeyHeld(Key_W))
-    {
-        rotationX += ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_S))
-    {
-        rotationX -= ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_A))
-    {
-        rotationY += ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_D))
-    {
-        rotationY -= ToRadians(120) * frameTime;
-    }
-    gCubeMatrix = MatrixRotationX(rotationX) * MatrixRotationY(rotationY);
+	static float rotationY = 0;
+	static float rotationX = 0;
+	static float rotationZ = 0;
+
+
+	if (KeyHeld(Key_A))
+	{
+		rotationY += ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_D))
+	{
+		rotationY -= ToRadians(120) * frameTime;
+	}
+
+
+	if (KeyHeld(Key_S))
+	{
+		rotationX -= ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_W))
+	{
+		rotationX += ToRadians(120) * frameTime;
+	}
+
+
+	if (KeyHeld(Key_Q))
+	{
+		rotationZ += ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_E))
+	{
+		rotationZ -= ToRadians(120) * frameTime;
+	}
+
+
+
+
+	gCubeMatrix = MatrixRotationZ(rotationZ) * MatrixRotationY(rotationY) * MatrixRotationX(rotationX);
 
 
     // Show frame time / FPS in the window title //
