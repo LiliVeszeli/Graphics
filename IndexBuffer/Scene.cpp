@@ -101,14 +101,40 @@ int gSimpleVertexDescCount = sizeof(gSimpleVertexDesc) / sizeof(gSimpleVertexDes
 // Now we are using an index buffer, we just list each vertex in the model once, with no duplication
 SimpleVertex gCubeVertices[] =
 {
-    CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
+   /* CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
     CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.5f, 0.5f, 0.0f },
     CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.6f, 0.6f, 0.0f },
     CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
 
 
 	CVector3{  1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
-	CVector3{  1.0f,  -1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
+	CVector3{  1.0f,  -1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },*/
+
+	CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
+	CVector3{ 1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 0.8f, 1.0 },
+
+	CVector3{ 1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.1f, 1.0 },
+
+	CVector3{ 1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.1f, 0.0, 0.6f, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
 
 
 };
@@ -121,10 +147,23 @@ int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Tota
 //
 DWORD gCubeIndices[] =
 {
+	//0, 1, 2,
+	//1, 3, 2, //swapped indexes so that the triangle is facing the right direction
+	//2, 3, 4,
+	//2, 4, 5
+
 	0, 1, 2,
-	1, 3, 2, //swapped indexes so that the triangle is facing the right direction
+	1, 2, 3,
 	2, 3, 4,
-	2, 4, 5
+	3, 4, 5,
+	4, 5, 6,
+	5, 6, 7,
+	6, 7, 8,
+	7, 8, 9,
+	8, 9, 10,
+	9, 10, 11,
+	10, 11, 12,
+	11, 12, 13
 };
 int gCubeNumIndices = sizeof(gCubeIndices) / sizeof(gCubeIndices[0]);
 
@@ -218,7 +257,7 @@ bool InitScene()
     // We'll see states in more detail later
     D3D11_RASTERIZER_DESC rasteriserState = {};
     rasteriserState.FillMode = D3D11_FILL_SOLID;
-    rasteriserState.CullMode = D3D11_CULL_BACK;
+    rasteriserState.CullMode = D3D11_CULL_NONE;
     rasteriserState.DepthClipEnable = true;
     hr = gD3DDevice->CreateRasterizerState(&rasteriserState, &gTwoSided);
     if (FAILED(hr))
@@ -338,7 +377,7 @@ void RenderScene()
 
     //****NEW
     // Draw the geometry - but this week using an index buffer
-    gD3DContext->DrawIndexed(12, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
+    gD3DContext->DrawIndexed(gCubeNumVertices, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
 		                               // starting at the beginning of the index list (second parameter 0) and with
 		                               // no offset (third parameter 0 - an advanced topic)
     //****
