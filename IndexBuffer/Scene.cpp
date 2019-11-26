@@ -22,15 +22,15 @@
 //--------------------------------------------------------------------------------------
 // Globals used to keep code simpler, but try to architect your own code in a better way
 
-// DirectX objects controlling the vertex buffer (mesh data on GPU) and vertex layout (description of a single vertex)
+// DirectX objects controlling the vertex & index buffers (mesh data on GPU) and vertex layout (description of a single vertex)
 ID3D11InputLayout* gSimpleVertexLayout = nullptr;
 ID3D11Buffer*      gSimpleVertexBuffer = nullptr;
+ID3D11Buffer*      gSimpleIndexBuffer = nullptr;
 
 ID3D11RasterizerState* gTwoSided; // This is used to make sure both sides of a triangle are drawn - useful for early tutorials
 
 // The world matrix for the cube - this positions and orients the cube and is updated every frame
 CMatrix4x4 gCubeMatrix;
-CMatrix4x4 gCubeMatrix2;
 
 
 //--------------------------------------------------------------------------------------
@@ -72,6 +72,7 @@ struct SimpleVertex
 };
 
 
+
 // Describe the "input layout" //
 
 // This describes the contents of the SimpleVertex structure above so DirectX will know what to expect when reading vertex data.
@@ -93,61 +94,31 @@ D3D11_INPUT_ELEMENT_DESC gSimpleVertexDesc[] =
 int gSimpleVertexDescCount = sizeof(gSimpleVertexDesc) / sizeof(gSimpleVertexDesc[0]); // This gives a count of rows in the array above
 
 
+
 // Geometry - the mesh to draw //
 
 // A CPU-side array of vertices for the geometry we wish to render. Each vertex is the SimpleVertex structure above.
-// Each triplet of vertices defines a single triangle in 3D. This is the 12 triangles of a cube.
+// Now we are using an index buffer, we just list each vertex in the model once, with no duplication
 SimpleVertex gCubeVertices[] =
 {
     CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
     CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.5f, 0.5f, 0.0f },
     CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.6f, 0.6f, 0.0f },
-
-    CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.5f, 0.5f, 0.0f },
-    CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.6f, 0.6f, 0.0f },
     CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
-
-    CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.3f, 1.0f, 0.3f, 0.0f },
-    CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.5f, 1.0f, 0.5f, 0.0f },
-    CVector3{  1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 1.0f, 0.6f, 0.0f },
-
-    CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.5f, 1.0f, 0.5f, 0.0f },
-    CVector3{  1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 1.0f, 0.6f, 0.0f },
-    CVector3{  1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.8f, 1.0f, 0.8f, 0.0f },
-
-    CVector3{  1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.3f, 0.3f, 1.0f, 0.0f },
-    CVector3{  1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.5f, 0.5f, 1.0f, 0.0f },
-    CVector3{ -1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.6f, 1.0f, 0.0f },
-
-    CVector3{  1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.5f, 0.5f, 1.0f, 0.0f },
-    CVector3{ -1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.6f, 1.0f, 0.0f },
-    CVector3{ -1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.8f, 0.8f, 1.0f, 0.0f },
-
-    CVector3{ -1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.5f, 0.3f, 0.3f, 0.0f },
-    CVector3{ -1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.6f, 0.6f, 0.0f },
-
-    CVector3{ -1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.6f, 0.6f, 0.0f },
-    CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.8f, 0.8f, 0.0f },
-
-    CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.3f, 0.5f, 0.3f, 0.0f },
-    CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.5f, 0.6f, 0.0f },
-
-    CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.5f, 0.6f, 0.0f },
-    CVector3{  1.0f, -1.0f,  1.0f }, ColourRGBA{ 0.8f, 0.5f, 0.8f, 0.0f },
-
-    CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.3f, 0.3f, 0.5f, 0.0f },
-    CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.6f, 0.5f, 0.0f },
-
-    CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.5f, 0.5f, 0.5f, 0.0f },
-    CVector3{ -1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.6f, 0.6f, 0.5f, 0.0f },
-    CVector3{  1.0f,  1.0f,  1.0f }, ColourRGBA{ 0.8f, 0.8f, 0.5f, 0.0f },
 };
 int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Total number of vertices in the array above
+
+
+
+// The index buffer shows how to join together the vertices above into triangles. As this is a triangle list, each triplet
+// of vertices define a single triangle. This is just the front square of a cube. You will build the rest as an exercise
+//
+DWORD gCubeIndices[] =
+{
+	0, 1, 2,
+	1, 2, 3,
+};
+int gCubeNumIndices = sizeof(gCubeIndices) / sizeof(gCubeIndices[0]);
 
 
 
@@ -160,9 +131,12 @@ int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Tota
 bool InitGeometry()
 {
     HRESULT hr; // To hold DirectX return values
+
+    //// Create a vertex and index buffer on the GPU ////
     
-    
-    // Create a "vertex buffer" on the GPU-side, which is just a copy the vertex array above. When rendering, data needs to be in GPU memory.
+    //****
+
+    // This is just a way to copy the vertex array above into GPU memory. When rendering, data needs to be in GPU memory.
     D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; // Indicate it is a vertex buffer
     bufferDesc.Usage     = D3D11_USAGE_DEFAULT;      // Default usage for this buffer - we'll see other usages later
@@ -177,6 +151,25 @@ bool InitGeometry()
         gLastError = "Error creating vertex buffer";
         return false;
     }
+
+    
+    //****NEW
+
+    // Create index buffer. Same as above code - but this copies the index array from above into GPU memory.
+    bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER; // Indicate it is a index buffer
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;         // Default usage for this buffer - we'll see other usages later
+    bufferDesc.ByteWidth = gCubeNumIndices * sizeof(DWORD); // Size of the buffer in bytes - each index is a DWORD (32-bit integer)
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+    initData.pSysMem = gCubeIndices;
+    hr = gD3DDevice->CreateBuffer(&bufferDesc, &initData, &gSimpleIndexBuffer);
+    if (FAILED(hr))
+    {
+        gLastError = "Error creating index buffer";
+        return false;
+    }
+
+    //****
 
 
     // These lines convert the vertex layout described above into an object (gSimpleVertexLayout) used when rendering
@@ -239,6 +232,7 @@ void ReleaseResources()
     if (gTwoSided)                gTwoSided->Release();
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
+    if (gSimpleIndexBuffer)       gSimpleIndexBuffer->Release();
     if (gSimpleVertexBuffer)      gSimpleVertexBuffer->Release();
     if (gSimpleVertexLayout)      gSimpleVertexLayout->Release();
 }
@@ -297,8 +291,13 @@ void RenderScene()
     UINT stride = sizeof(SimpleVertex); // Size of a single vertex in the buffer
     UINT offset = 0;
     gD3DContext->IASetVertexBuffers(0, 1, &gSimpleVertexBuffer, &stride, &offset);
+    
+    //****NEW
+    // Select the index buffer created above to go along with the vertex buffer - indicate it uses 32-bit integers
+    gD3DContext->IASetIndexBuffer(gSimpleIndexBuffer, DXGI_FORMAT_R32_UINT, 0);  
+    //****
 
-    // Indicate the layout of our vertex buffer. Only needs to be done once unless we want to use a different buffer
+        // Indicate the layout of our vertex buffer. Only needs to be done once unless we want to use a different buffer
     gD3DContext->IASetInputLayout(gSimpleVertexLayout);
     
     // Also indicate the primitive topology of the buffer. Our buffer holds a triangle list - each set of 3 vertices
@@ -311,7 +310,7 @@ void RenderScene()
 
     
     
-    //// Render cube 1 ////
+    //// Render cube ////
 
     // Send the world matrix for the cube over to the shaders on the GPU
     // See the section commented as "Constant Buffers" near the top of the file for more info about the data being sent here
@@ -319,7 +318,6 @@ void RenderScene()
     // - "memcpy" copies the C++ data over to the GPU's constant buffer
     // - "Unmap" closes the GPU's buffer again - we must do this as soon as possible
     gPerModelConstants.worldMatrix = gCubeMatrix;
-
     gD3DContext->Map(gPerModelConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
     memcpy(cb.pData, &gPerModelConstants, sizeof(gPerModelConstants));
     gD3DContext->Unmap(gPerModelConstantBuffer, 0);
@@ -329,22 +327,13 @@ void RenderScene()
     // The first parameter must match constant buffer number in the shader, so this is constant buffer 0 on the vertex shader
     gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
 
-    // Draw the cube, 36 vertices starting at vertex 0
-    gD3DContext->Draw(36, 0);
 
-
-	gPerModelConstants.worldMatrix = gCubeMatrix2;
-	gD3DContext->Map(gPerModelConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-	memcpy(cb.pData, &gPerModelConstants, sizeof(gPerModelConstants));
-	gD3DContext->Unmap(gPerModelConstantBuffer, 0);
-
-	// Indicate that the constant buffer we just updated is for use in the vertex shader (VS)
-	// If you look at the vertex shader code, there is a structure with the same content that receives the data
-	// The first parameter must match constant buffer number in the shader, so this is constant buffer 0 on the vertex shader
-	gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
-
-																	   // Draw the cube, 36 vertices starting at vertex 0
-	gD3DContext->Draw(36, 0);
+    //****NEW
+    // Draw the geometry - but this week using an index buffer
+    gD3DContext->DrawIndexed(6, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
+		                               // starting at the beginning of the index list (second parameter 0) and with
+		                               // no offset (third parameter 0 - an advanced topic)
+    //****
 
 
     //// Scene completion ////
@@ -363,150 +352,35 @@ void UpdateScene(float frameTime)
 {
     //// Update camera ////
 
-
-	static float posx = 0.0f;
-	static float posy = 0.0f;
-	static float posz = -5.0f;
-
-	if (KeyHeld(Key_Up))
-	{
-		posy -= 2.0f *frameTime;
-	}
-	if (KeyHeld(Key_Down))
-	{
-
-		posy += 2.0f *frameTime;
-	}
-
-	//X
-	if (KeyHeld(Key_Right))
-	{
-
-		posx -= 2.0f *frameTime;
-	}
-	if (KeyHeld(Key_Left))
-	{
-
-		posx += 2.0f *frameTime;
-	}
-
-	CVector3 cameraPos = { posx, posy, posz };
-
     // Create a matrix to position the camera - called the view (camera) matrix - we'll see this in more detail later
-    gPerFrameConstants.viewMatrix = InverseAffine(MatrixTranslation(CVector3 (posx, posy, posz)));
+    gPerFrameConstants.viewMatrix = InverseAffine(MatrixTranslation(CVector3(0, 0, -5.0f)));
 
     // Create a "projection matrix" - this determines properties of the camera - again we'll see this later
     gPerFrameConstants.projectionMatrix = MakeProjectionMatrix(); // Using a helper function to make this special matrix
 
-	
-	
-	
-	
+
 
     //// Update cube 1 ////
 
     // Create a matrix to position and orientate the cube
-	//rotations
-    static float rotationY = 0;
-	static float rotationX = 0;
-	static float rotationZ = 0;
-	static CVector3 scaleX = { 1.0f, 1.0f, 1.0f };
-	static CVector3 translate = { 0.0f, 0.0f, 0.0f };
-	static CVector3 position2 = { 0.0f, 0.0f, 10.0f }; //position of cube 2
-
+    static float rotationX = 0, rotationY = 0;
+    if (KeyHeld(Key_W))
+    {
+        rotationX += ToRadians(120) * frameTime;
+    }
+    if (KeyHeld(Key_S))
+    {
+        rotationX -= ToRadians(120) * frameTime;
+    }
     if (KeyHeld(Key_A))
     {
         rotationY += ToRadians(120) * frameTime;
     }
-   
-	if (KeyHeld(Key_D))
-	{
-		rotationY -= ToRadians(120) * frameTime;
-	}
-	
-
-	if (KeyHeld(Key_S))
-	{
-		rotationX -= ToRadians(120) * frameTime;
-	}
-	
-	if (KeyHeld(Key_W))
-	{
-		rotationX += ToRadians(120) * frameTime;
-	}
-	
-
-	if (KeyHeld(Key_Q))
-	{
-		rotationZ += ToRadians(120) * frameTime;
-	}
-	
-	if (KeyHeld(Key_E))
-	{
-		rotationZ -= ToRadians(120) * frameTime;
-	}
-
-
-	//X scaling
-	if (KeyHeld(Key_2))
-	{
-		scaleX.x += 2.0f *frameTime;
-		/*scaleX.y += 2.0f *frameTime;
-		scaleX.z += 2.0f *frameTime;*/
-	}
-	
-
-	if (KeyHeld(Key_1))
-	{
-		scaleX.x -= 2.0f *frameTime;
-		/*scaleX.y -= 2.0f *frameTime;
-		scaleX.z -= 2.0f *frameTime;*/
-	}
-	
-	//matrix translation
-	//Z
-	if (KeyHeld(Key_I))
-	{
-		
-		 translate.z+= 2.0f *frameTime;
-	}
-	if (KeyHeld(Key_K))
-	{
-		
-		 translate.z-= 2.0f *frameTime;
-	}
-
-	//X
-	if (KeyHeld(Key_L))
-	{
-
-		translate.x += 2.0f *frameTime;
-	}
-	if (KeyHeld(Key_J))
-	{
-
-		translate.x -= 2.0f *frameTime;
-	}
-
-	//Y
-	if (KeyHeld(Key_U))
-	{
-
-		translate.y += 2.0f *frameTime;
-	}
-	if (KeyHeld(Key_O))
-	{
-
-		translate.y -= 2.0f *frameTime;
-	}
-
-	
-
-	gCubeMatrix = MatrixScaling(scaleX)* MatrixRotationZ(rotationZ)* MatrixRotationY(rotationY)* MatrixRotationX(rotationX)*MatrixTranslation(translate);
-	gCubeMatrix2 = MatrixTranslation(position2);
-
-
-
+    if (KeyHeld(Key_D))
+    {
+        rotationY -= ToRadians(120) * frameTime;
+    }
+    gCubeMatrix = MatrixRotationX(rotationX) * MatrixRotationY(rotationY);
 
 
     // Show frame time / FPS in the window title //
@@ -523,7 +397,7 @@ void UpdateScene(float frameTime)
         std::ostringstream frameTimeMs;
         frameTimeMs.precision(2);
         frameTimeMs << std::fixed << avgFrameTime * 1000;
-        std::string windowTitle = "CO2409 Week 8: 3D Matrices - Frame Time: " + frameTimeMs.str() +
+        std::string windowTitle = "CO2409 Week 9: Index Buffers - Frame Time: " + frameTimeMs.str() +
                                   "ms, FPS: " + std::to_string(static_cast<int>(1 / avgFrameTime + 0.5f));
         SetWindowTextA(gHWnd, windowTitle.c_str());
         totalFrameTime = 0;
