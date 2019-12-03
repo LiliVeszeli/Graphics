@@ -356,7 +356,7 @@ void RenderScene()
 	gD3DContext->PSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
 	
 	// Select the texture to use in the pixel shader
-    gD3DContext->PSSetShaderResources(0, 1, &gCubeTextureSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetShaderResources(0, 1, &gCubeTextureSRV); // First parameter must match texture slot number in the shader
     
     // Draw the geometry using an index buffer
     gD3DContext->DrawIndexed(36, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
