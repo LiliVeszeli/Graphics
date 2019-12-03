@@ -101,14 +101,40 @@ int gSimpleVertexDescCount = sizeof(gSimpleVertexDesc) / sizeof(gSimpleVertexDes
 // Now we are using an index buffer, we just list each vertex in the model once, with no duplication
 SimpleVertex gCubeVertices[] =
 {
-    CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
+   /* CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
     CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.5f, 0.5f, 0.0f },
     CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.6f, 0.6f, 0.0f },
     CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
 
 
 	CVector3{  1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
-	CVector3{  1.0f,  -1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
+	CVector3{  1.0f,  -1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },*/
+
+	CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
+	CVector3{ 1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 0.8f, 1.0 },
+
+	CVector3{ 1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.1f, 1.0 },
+
+	CVector3{ 1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+
+	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.1f, 0.0, 0.6f, 1.0 },
+
+	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
+
+	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
 
 
 };
@@ -121,10 +147,23 @@ int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Tota
 //
 DWORD gCubeIndices[] =
 {
+	//0, 1, 2,
+	//1, 3, 2, //swapped indexes so that the triangle is facing the right direction
+	//2, 3, 4,
+	//2, 4, 5
+
 	0, 1, 2,
-	1, 3, 2, //swapped indexes so that the triangle is facing the right direction
+	1, 3, 2,
 	2, 3, 4,
-	2, 4, 5
+	4, 3, 5,
+	4, 5, 6,
+	6, 5, 7,
+	6, 7, 8,
+	8, 7, 9,
+	8, 9, 10,
+	9, 11, 10,
+	10, 11, 12,
+	12, 11, 13
 };
 int gCubeNumIndices = sizeof(gCubeIndices) / sizeof(gCubeIndices[0]);
 
@@ -338,7 +377,7 @@ void RenderScene()
 
     //****NEW
     // Draw the geometry - but this week using an index buffer
-    gD3DContext->DrawIndexed(12, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
+    gD3DContext->DrawIndexed(36, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
 		                               // starting at the beginning of the index list (second parameter 0) and with
 		                               // no offset (third parameter 0 - an advanced topic)
     //****
@@ -371,24 +410,47 @@ void UpdateScene(float frameTime)
     //// Update cube 1 ////
 
     // Create a matrix to position and orientate the cube
-    static float rotationX = 0, rotationY = 0;
-    if (KeyHeld(Key_W))
-    {
-        rotationX += ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_S))
-    {
-        rotationX -= ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_A))
-    {
-        rotationY += ToRadians(120) * frameTime;
-    }
-    if (KeyHeld(Key_D))
-    {
-        rotationY -= ToRadians(120) * frameTime;
-    }
-    gCubeMatrix = MatrixRotationX(rotationX) * MatrixRotationY(rotationY);
+	static float rotationY = 0;
+	static float rotationX = 0;
+	static float rotationZ = 0;
+
+
+	if (KeyHeld(Key_A))
+	{
+		rotationY += ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_D))
+	{
+		rotationY -= ToRadians(120) * frameTime;
+	}
+
+
+	if (KeyHeld(Key_S))
+	{
+		rotationX -= ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_W))
+	{
+		rotationX += ToRadians(120) * frameTime;
+	}
+
+
+	if (KeyHeld(Key_Q))
+	{
+		rotationZ += ToRadians(120) * frameTime;
+	}
+
+	if (KeyHeld(Key_E))
+	{
+		rotationZ -= ToRadians(120) * frameTime;
+	}
+
+
+
+
+	gCubeMatrix = MatrixRotationZ(rotationZ) * MatrixRotationY(rotationY) * MatrixRotationX(rotationX);
 
 
     // Show frame time / FPS in the window title //
