@@ -29,6 +29,7 @@ struct PixelShaderInput
                                             // to the pixel shader and so it uses the special semantic "SV_Position"
                                             // because the shader needs to identify this important information
 	float3 colour : colour;
+	float2 uv : uv;
 };
 
 
@@ -48,6 +49,7 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
 {
     float4x4 gViewMatrix;
     float4x4 gProjectionMatrix;
+	
 }
 // Note we don't need the name of the constant buffer to access the variables inside, so we can just write gViewMatrix in the shader for example
 
@@ -60,6 +62,7 @@ cbuffer PerModelConstants : register(b1) // The b1 gives this constant buffer th
 {
     float4x4 gWorldMatrix;
 	float gCubeColour;
+	float Wiggle;
 }
 
 //**** 

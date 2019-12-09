@@ -25,10 +25,21 @@ SamplerState Bilinear   : register(s0); // A sampler is a filter for a texture l
 // Most basic pixel shader functionality to start with
 float4 main(PixelShaderInput input) : SV_Target
 {
+	float sinY = sin(input.uv.y * radians(360.0f) + Wiggle);
+	input.uv.x += 0.1f * sinY;
+
+	float sinX = sin(input.uv.x * radians(360.0f) + Wiggle);
+	input.uv.y += 0.1f * sinX;
+
+
+	float3 textureColour = DiffuseMap.Sample(Bilinear, input.uv);
+
     float4 colour;
     colour.r = 1.0f;
     colour.g = 1.0f;
     colour.b = 0.0f;
     colour.a = 1.0f;
-    return float4 (input.colour, 1);
+
+	
+    return float4 (textureColour*input.colour.rgb, 1);
 }

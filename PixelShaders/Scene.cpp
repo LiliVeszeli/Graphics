@@ -49,6 +49,7 @@ struct
 {
     CMatrix4x4 viewMatrix;
     CMatrix4x4 projectionMatrix;
+	
 } gPerFrameConstants;
 ID3D11Buffer* gPerFrameConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure
 
@@ -59,6 +60,7 @@ struct
 {
     CMatrix4x4 worldMatrix;
 	float cubeColour;
+	float Wiggle;
 } gPerModelConstants;
 ID3D11Buffer* gPerModelConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure
 
@@ -385,6 +387,8 @@ void UpdateScene(float frameTime)
 
     // Create a "projection matrix" - this determines properties of the camera - again we'll see this later
     gPerFrameConstants.projectionMatrix = MakeProjectionMatrix(); // Using a helper function to make this special matrix
+
+	gPerModelConstants.Wiggle += 6 * frameTime;
 
 
     //// Update cube 1 ////

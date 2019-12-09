@@ -46,8 +46,8 @@ PixelShaderInput main(BasicVertex modelVertex)
     float3 worldNormal = (float3)mul(gWorldMatrix, modelNormal);
     output.colour = gAmbientColour + gLightColour * saturate(dot(normalize(worldNormal), gLightDirection));
 
-	float2 uv;
-	output.uv = // ?????? 
+	
+	output.uv = modelVertex.uv;
 	
 
     return output; // Ouput data sent down the pipeline (to the pixel shader)
