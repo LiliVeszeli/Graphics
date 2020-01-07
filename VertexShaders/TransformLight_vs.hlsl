@@ -35,7 +35,12 @@ PixelShaderInput main(BasicVertex modelVertex)
     output.projectedPosition = mul(gProjectionMatrix, viewPosition); //missing
 
     // Temporary lines, replace each with the full lighting code as you do the lab exercise
-    output.diffuseLight  = 1.0f;
+	
+	float3 lightNormal = normalize(lightPosition - worldPosition);
+	float dotProduct = max( dot(worldNormal, lightNormal), 0);
+
+    output.diffuseLight  = lightColour * dotProduct + ambientColour;
+
     output.specularLight = 0.0f;
 
     // Pass texture coordinates (UVs) on to the pixel shader, the vertex shader doesn't need them
