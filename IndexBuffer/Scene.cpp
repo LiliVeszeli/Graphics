@@ -147,10 +147,6 @@ int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Tota
 //
 DWORD gCubeIndices[] =
 {
-	//0, 1, 2,
-	//1, 3, 2, //swapped indexes so that the triangle is facing the right direction
-	//2, 3, 4,
-	//2, 4, 5
 
 	0, 1, 2,
 	1, 3, 2,
