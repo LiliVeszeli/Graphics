@@ -143,16 +143,17 @@ namespace PixelPlotter
 
 		float X2 = X;
 		float Y2 = Y - R;
-
+		float radian = PI / 180;
 		
 
-		for (int i =1; i < 360; i ++)
+		for (float i = radian; i < 2*PI; i += radian)
 		{
 
 			float X1 = X + R * sin(i);
 			float Y1 = Y - R * cos(i);
 
-			SetViewportPixel(X1, Y1, PixelColour);
+
+			DrawLine(X1, Y1, (X + R * sin(i+radian)), (Y - R * cos(i+radian)), PixelColour);
 		}
 
 		//DrawPolygon(1000, X, Y,R, PixelColour);

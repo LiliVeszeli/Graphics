@@ -101,40 +101,29 @@ int gSimpleVertexDescCount = sizeof(gSimpleVertexDesc) / sizeof(gSimpleVertexDes
 // Now we are using an index buffer, we just list each vertex in the model once, with no duplication
 SimpleVertex gCubeVertices[] =
 {
-   /* CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.3f, 0.3f, 0.0f },
-    CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.5f, 0.5f, 0.0f },
-    CVector3{  1.0f, -1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.6f, 0.6f, 0.0f },
-    CVector3{  1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
+
+	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 }, //0
+	CVector3{ 1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.0, 1.0 }, //1
+	CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 }, //2
+
+	CVector3{ 1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 }, //3
+
+	CVector3{ 1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 }, //4
+
+	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 }, //6
+
+	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 }, //8
 
 
-	CVector3{  1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },
-	CVector3{  1.0f,  -1.0f, 1.0f }, ColourRGBA{ 1.0f, 0.8f, 0.8f, 0.0f },*/
 
-	CVector3{ -1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
-	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
-	CVector3{ 1.0f, -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
 
-	CVector3{ 1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.0, 1.0 },
+	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 0.8f, 1.0 }, //10
 
-	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
 
-	CVector3{ -1.0f,  1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
+	
 
-	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 1.0, 1.0, 1.0, 1.0 },
+	
 
-	CVector3{ -1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
-
-	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 0.8f, 1.0 },
-
-	CVector3{ 1.0f,  -1.0f, -1.0f }, ColourRGBA{ 0.2f, 0.0, 0.1f, 1.0 },
-
-	CVector3{ 1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
-
-	CVector3{ 1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.1f, 0.0, 0.6f, 1.0 },
-
-	CVector3{ -1.0f,  -1.0f, 1.0f }, ColourRGBA{ 0.0f, 0.0, 0.0, 1.0 },
-
-	CVector3{ -1.0f,  1.0f, 1.0f }, ColourRGBA{ 0.2f, 0.0, 1.0, 1.0 },
 
 
 };
@@ -148,18 +137,13 @@ int gCubeNumVertices = sizeof(gCubeVertices) / sizeof(gCubeVertices[0]); // Tota
 DWORD gCubeIndices[] =
 {
 
-	0, 1, 2,
-	1, 3, 2,
-	2, 3, 4,
-	4, 3, 5,
-	4, 5, 6,
-	6, 5, 7,
-	6, 7, 8,
-	8, 7, 9,
-	8, 9, 10,
-	9, 11, 10,
-	10, 11, 12,
-	12, 11, 13
+	0, 1, 2, 3,
+	4, 1, 5,
+	0, 6,
+	2, 7,
+	4,
+	6, 5
+
 };
 int gCubeNumIndices = sizeof(gCubeIndices) / sizeof(gCubeIndices[0]);
 
@@ -345,7 +329,7 @@ void RenderScene()
     
     // Also indicate the primitive topology of the buffer. Our buffer holds a triangle list - each set of 3 vertices
     // will be connected into a triangle. Again, there is no need to do this more than once if you are not changing topology
-    gD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    gD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
     // Select which shaders to use when rendering. Only need to do once if you are not changing shader
     gD3DContext->VSSetShader(gSimpleVertexShader, nullptr, 0);
@@ -373,7 +357,7 @@ void RenderScene()
 
     //****NEW
     // Draw the geometry - but this week using an index buffer
-    gD3DContext->DrawIndexed(36, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
+    gD3DContext->DrawIndexed(14, 0, 0); // Draw the first 6 indexed vertices (2 triangles in a triangle list), 
 		                               // starting at the beginning of the index list (second parameter 0) and with
 		                               // no offset (third parameter 0 - an advanced topic)
     //****
