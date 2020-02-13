@@ -387,7 +387,8 @@ void RenderScene()
     gPerFrameConstants.viewMatrix           = gCameraViewMatrix;
     gPerFrameConstants.projectionMatrix     = gCameraProjectionMatrix;
     gPerFrameConstants.viewProjectionMatrix = gPerFrameConstants.viewMatrix * gPerFrameConstants.projectionMatrix;
-    gPerFrameConstants.lightColour    = gLightColour;
+	gPerFrameConstants.ambientColour = gAmbientColour;
+	gPerFrameConstants.lightColour = gLightColour;
     gPerFrameConstants.lightPosition  = gLightPosition;
     gPerFrameConstants.specularPower  = gSpecularPower;
     gPerFrameConstants.cameraPosition = gCameraWorldMatrix.GetPosition();
