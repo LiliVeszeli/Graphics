@@ -38,7 +38,7 @@ float4 main(PixelShaderInput input) : SV_Target
     // Ignoring any alpha in the texture, just reading RGB
     float3 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv).rgb;
 
-    float3 finalColour = input.diffuseLight * diffuseMapColour + input.specularLight;
+	float3 finalColour = input.ambientLight * input.diffuseLight* diffuseMapColour + input.specularLight;
 
     return float4(finalColour, 1.0f); // Always use 1.0f for alpha - no blending in this lab
 }

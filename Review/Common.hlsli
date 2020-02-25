@@ -28,7 +28,7 @@ struct PixelShaderInput
     float4 projectedPosition : SV_Position; // This is the position of the pixel to render, this is a required input
                                             // to the pixel shader and so it uses the special semantic "SV_Position"
                                             // because the shader needs to identify this important information
-    
+	float3 ambientLight : ambientLight;
     float3 diffuseLight  : diffuseLight;  // Lighting is calculated by the vertex shader...
     float3 specularLight : specularLight; //...and passed to the pixel shader
     

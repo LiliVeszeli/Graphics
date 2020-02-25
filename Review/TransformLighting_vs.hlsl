@@ -34,7 +34,9 @@ PixelShaderInput main(BasicVertex modelVertex)
     float3 lightDirection = normalize(gLightPosition - worldPosition.xyz);
     output.diffuseLight = gAmbientColour + gLightColour * max(dot(normalize(worldNormal), lightDirection), 0);
 
-    output.specularLight = 0;
+	output.specularLight = gAmbientColour + gLightColour * max(dot(normalize(worldNormal), lightDirection), 0);
+
+	output.ambientLight = gAmbientColour;
 
     // Pass texture coordinates (UVs) on to the pixel shader, the vertex shader doesn't need them
     output.uv = modelVertex.uv;
