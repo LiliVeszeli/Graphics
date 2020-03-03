@@ -69,6 +69,13 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float3   gLightColour;
     float    padding2;
 
+	float3   gLight2Position; // 3 floats: x, y z
+	float    padding4;       // IMPORTANT technical point: shaders work with float4 values. If constant buffer variables don't align
+							 // to the size of a float4 then HLSL (GPU) will insert padding, which can cause problems matching 
+							 // structure between C++ and GPU. So add these unused padding variables to both HLSL and C++ structures.
+	float3   gLight2Colour;
+	float    padding5;
+
     float3   gAmbientColour;
     float    gSpecularPower;  // In this case we actually have a useful float variable that we can use to pad to a float4
 
@@ -87,5 +94,5 @@ cbuffer PerModelConstants : register(b1) // The b1 gives this constant buffer th
     float4x4 gWorldMatrix;
 
     float3   gObjectColour;
-    float    padding4;  // See notes on padding in structure above
+    float    padding6;  // See notes on padding in structure above
 }

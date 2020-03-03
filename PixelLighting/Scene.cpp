@@ -54,7 +54,7 @@ CMatrix4x4  gCameraViewMatrix;
 CMatrix4x4 gCameraProjectionMatrix;
 
 
-// Light information
+// Light 1 information
 CVector3    gLight1Position;                      // Light 1 orbits the cube so don't set an initial position
 CVector3    gLight1Colour = { 1.0f, 0.8f, 0.4f }; // Light colour - warm yellow
 float       gLight1Strength = 1;                  // Allows the light to be stronger or weaker - also controls the light model scale
@@ -66,6 +66,16 @@ float    gSpecularPower = 64.0f;                // Specular power controls shini
 // Variables controlling light1's orbiting of the cube
 const float gLightOrbit = 5.0f;
 const float gLightOrbitSpeed = 0.7f;
+
+
+
+// Light 2 information
+CVector3    gLight2Position = {-10, 20, 10 };
+CVector3    gLight2Colour = { 138,43,226 }; // Light colour - warm yellow
+float       gLight2Strength = 1;                  // Allows the light to be stronger or weaker - also controls the light model scale
+CMatrix4x4  gLight2WorldMatrix;                   // For rendering a model where the light is
+
+
 
 
 
@@ -119,6 +129,13 @@ struct
     CVector3   lightColour;
     float      padding2;
 
+
+	CVector3   light2Position;
+	float      padding4;
+
+	CVector3   light2Colour;
+	float	   padding5;
+
     CVector3   ambientColour;
     float      specularPower;  // In this case we actually have a useful float variable that we can use to pad to a float4
 
@@ -134,7 +151,7 @@ struct
 {
     CMatrix4x4 worldMatrix;
     CVector3   objectColour; // Allows each light model to be tinted to match the light colour they cast
-    float      padding4;
+    float      padding6;
 } gPerModelConstants;
 ID3D11Buffer* gPerModelConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure
 
@@ -431,6 +448,8 @@ void RenderScene()
     gPerFrameConstants.viewProjectionMatrix = gPerFrameConstants.viewMatrix * gPerFrameConstants.projectionMatrix;
     gPerFrameConstants.lightColour    = gLight1Colour * gLight1Strength;
     gPerFrameConstants.lightPosition  = gLight1Position;
+	gPerFrameConstants.light2Colour = gLight2Colour * gLight2Strength;
+	gPerFrameConstants.light2Position = gLight2Position;
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
     gPerFrameConstants.cameraPosition = gCameraWorldMatrix.GetPosition();
@@ -534,6 +553,10 @@ void RenderScene()
     // Send the world matrix for the light over to the GPU (using a constant buffer) - DirectX code in helper function
     gPerModelConstants.worldMatrix = gLight1WorldMatrix; // Update C++ side constant buffer
     gPerModelConstants.objectColour = gLight1Colour;
+
+	gPerModelConstants.worldMatrix = gLight2WorldMatrix; // Update C++ side constant buffer
+	gPerModelConstants.objectColour = gLight2Colour;
+
     UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
 
     // Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)

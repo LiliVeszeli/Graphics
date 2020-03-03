@@ -7,6 +7,8 @@
 // The class also doesn't load textures, filters or shaders as the outer code is
 // expected to select these things. A later lab will introduce a more robust loader.
 
+#define NOMINMAX
+
 #include "Mesh.h"
 #include "Shader.h" // Needed for helper function CreateSignatureForVertexLayout
 #include "CVector2.h" 
@@ -18,6 +20,7 @@
 #include <assimp/include/assimp/scene.h>
 
 #include <memory>
+#include <stdexcept>
 
 
 // Pass the name of the mesh file to load. Uses assimp (http://www.assimp.org/) to support many file types

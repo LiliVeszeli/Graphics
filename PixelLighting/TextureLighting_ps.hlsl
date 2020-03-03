@@ -30,11 +30,19 @@ SamplerState TexSampler : register(s0); // A sampler is a filter for a texture l
 float4 main(LightingPixelShaderInput input) : SV_Target
 {
 	float3 lightDirection = normalize(gLightPosition - input.worldPosition.xyz);
-	float3 diffuseLight = gAmbientColour + gLightColour * max(dot(input.worldNormal, lightDirection), 0);
+	float3 diffuseLight = gLightColour * max(dot(input.worldNormal, lightDirection), 0);
+
+
+	float3 lightDirection2 = normalize(gLight2Position - input.worldPosition.xyz);
+	float3 diffuseLight2 =  gLight2Colour * max(dot(input.worldNormal, light2Direction), 0);
 
 	float3 cameraDirection = normalize(gCameraPosition - input.worldPosition.xyz);
+
 	float3 halfway = normalize(lightDirection + cameraDirection);
 	float3 specularLight = gLightColour * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+
+	halfway = normalize(lightDirection2 + cameraDirection);
+	float3 specularLight2 = gLight2Colour * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
 
     // Sample diffuse material colour for this pixel from a texture using a given sampler that you set up in the C++ code
     // Ignoring any alpha in the texture, just reading RGB
@@ -42,7 +50,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 diffuseMaterialColour = textureColour;
     float specularMaterialColour = DiffuseSpecularMap.Sample(TexSampler, input.uv).a;
 
-    float3 finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
+    float3 finalColour = (gAmbientColour + diffuseLight + diffuseLight2 + ) * diffuseMaterialColour + (specularLight + specularLigh2) * specularMaterialColour;
 
     return float4(finalColour, 1.0f); // Always use 1.0f for alpha - no alpha blending in this lab
 }
