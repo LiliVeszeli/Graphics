@@ -34,7 +34,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 
 
 	float3 lightDirection2 = normalize(gLight2Position - input.worldPosition.xyz);
-	float3 diffuseLight2 =  gLight2Colour * max(dot(input.worldNormal, light2Direction), 0);
+	float3 diffuseLight2 =  gLight2Colour * max(dot(input.worldNormal, lightDirection2), 0);
 
 	float3 cameraDirection = normalize(gCameraPosition - input.worldPosition.xyz);
 
@@ -50,7 +50,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 diffuseMaterialColour = textureColour;
     float specularMaterialColour = DiffuseSpecularMap.Sample(TexSampler, input.uv).a;
 
-    float3 finalColour = (gAmbientColour + diffuseLight + diffuseLight2 + ) * diffuseMaterialColour + (specularLight + specularLigh2) * specularMaterialColour;
+    float3 finalColour = (gAmbientColour + diffuseLight + diffuseLight2) * diffuseMaterialColour + (specularLight + specularLight2) * specularMaterialColour;
 
     return float4(finalColour, 1.0f); // Always use 1.0f for alpha - no alpha blending in this lab
 }

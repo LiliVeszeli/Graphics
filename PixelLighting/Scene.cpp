@@ -71,7 +71,7 @@ const float gLightOrbitSpeed = 0.7f;
 
 // Light 2 information
 CVector3    gLight2Position = {-10, 20, 10 };
-CVector3    gLight2Colour = { 138,43,226 }; // Light colour - warm yellow
+CVector3    gLight2Colour = { 100/255.0f,43 / 255.0f,226 / 255.0f }; // Light colour - warm yellow
 float       gLight2Strength = 1;                  // Allows the light to be stronger or weaker - also controls the light model scale
 CMatrix4x4  gLight2WorldMatrix;                   // For rendering a model where the light is
 
