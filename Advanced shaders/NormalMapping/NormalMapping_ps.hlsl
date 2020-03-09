@@ -63,7 +63,7 @@ float4 main(NormalMappingPixelShaderInput input) : SV_Target
 	
 	// Get the texture normal from the normal map. The r,g,b pixel values actually store x,y,z components of a normal. However, r,g,b
 	// values are stored in the range 0->1, whereas the x, y & z components should be in the range -1->1. So some scaling is needed
-	float3 textureNormal = 1.5f * NormalMap.Sample(TexSampler, input.uv).rgb - 1.0f; // Scale from 0->1 to -1->1
+	float3 textureNormal = 2.0f * NormalMap.Sample(TexSampler, input.uv).rgb - 1.0f; // Scale from 0->1 to -1->1
 
 	// Now convert the texture normal into model space using the inverse tangent matrix, and then convert into world space using the world
 	// matrix. Normalise, because of the effects of texture filtering and in case the world matrix contains scaling

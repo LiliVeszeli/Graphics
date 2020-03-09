@@ -548,16 +548,7 @@ void RenderScene()
     gD3DContext->PSSetShader(gLightModelPixelShader,  nullptr, 0);
 
     
-    //// Render light ////
-
-    // Send the world matrix for the light over to the GPU (using a constant buffer) - DirectX code in helper function
-    gPerModelConstants.worldMatrix = gLight1WorldMatrix; // Update C++ side constant buffer
-    gPerModelConstants.objectColour = gLight1Colour;
-
-	gPerModelConstants.worldMatrix = gLight2WorldMatrix; // Update C++ side constant buffer
-	gPerModelConstants.objectColour = gLight2Colour;
-
-    UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
+    //// Render lights ////
 
     // Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
     gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
@@ -572,9 +563,26 @@ void RenderScene()
     gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
     gD3DContext->RSSetState(gCullNoneState);
 
-    // Draw the geometry using an index buffer
+
+
+
+	// Send the world matrix for the light over to the GPU (using a constant buffer) - DirectX code in helper function
+	gPerModelConstants.worldMatrix = gLight1WorldMatrix; // Update C++ side constant buffer
+	gPerModelConstants.objectColour = gLight1Colour;
+	UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
+
+	// Draw the geometry using an index buffer
     gD3DContext->DrawIndexed(18, 0, 0);
 
+
+
+
+	gPerModelConstants.worldMatrix = gLight2WorldMatrix; // Update C++ side constant buffer
+	gPerModelConstants.objectColour = gLight2Colour;
+	UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
+
+	// Draw the geometry using an index buffer
+	gD3DContext->DrawIndexed(18, 0, 0);
 
     //-------------------------------------------------------------------------
 
@@ -647,6 +655,8 @@ void UpdateLight(float frameTime)
 	rotate -= gLightOrbitSpeed * frameTime;
 
     gLight1WorldMatrix = MatrixScaling(gLight1Strength) * MatrixTranslation(gLight1Position);
+
+	gLight2WorldMatrix = MatrixScaling(gLight2Strength) * MatrixTranslation(gLight2Position);
 }
 
 
