@@ -138,6 +138,9 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 ID3D11Resource*           gCubeDiffuseSpecularMap    = nullptr; // This object represents the memory used by the texture on the GPU
 ID3D11ShaderResourceView* gCubeDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
 
+ID3D11Resource* gTVDiffuseSpecularMap = nullptr; // This object represents the memory used by the texture on the GPU
+ID3D11ShaderResourceView* gTVDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
+
 ID3D11Resource*           gDecalDiffuseSpecularMap    = nullptr;
 ID3D11ShaderResourceView* gDecalDiffuseSpecularMapSRV = nullptr;
 
@@ -172,7 +175,7 @@ bool InitGeometry()
         gSphereMesh = new Mesh("Sphere.x");
         gGroundMesh = new Mesh("Hills.x");
         gLightMesh  = new Mesh("Light.x");
-        gPortalMesh = new Mesh("Sphere.x");
+        gPortalMesh = new Mesh("Portal.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -212,7 +215,8 @@ bool InitGeometry()
         !LoadTexture("CargoA.dds",               &gCrateDiffuseSpecularMap,  &gCrateDiffuseSpecularMapSRV) ||
         !LoadTexture("Brick1.jpg",               &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
         !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap, &gGroundDiffuseSpecularMapSRV ) ||
-        !LoadTexture("Flare.jpg",                &gLightDiffuseMap,          &gLightDiffuseMapSRV ))
+        !LoadTexture("Flare.jpg",                &gLightDiffuseMap,          &gLightDiffuseMapSRV) ||
+		!LoadTexture("tv.dds",					 &gTVDiffuseSpecularMap, &gTVDiffuseSpecularMapSRV))
     {
         gLastError = "Error loading textures";
         return false;
@@ -522,6 +526,7 @@ void RenderSceneFromCamera(Camera* camera)
     // No change to shaders and states - only change textures for each one (texture sampler also stays the same)
 
     gD3DContext->PSSetShaderResources(0, 1, &gCubeDiffuseSpecularMapSRV); 
+	gD3DContext->PSSetShaderResources(1, 1, &gTVDiffuseSpecularMapSRV);
     gCube->Render();
 
     gD3DContext->PSSetShaderResources(0, 1, &gCrateDiffuseSpecularMapSRV);
@@ -623,9 +628,13 @@ void RenderScene()
 
     // Render the scene for the portal
     RenderSceneFromCamera(gPortalCamera);
-	RenderSceneFromCamera(gPortal2Camera);
 
+	// The portal texture will later be used on models in the main scene
+	gD3DContext->OMSetRenderTargets(1, &gPortal2RenderTarget, gPortalDepthStencilView);
 
+	// Clear the portal texture to a fixed colour and the portal depth buffer to the far distance
+	gD3DContext->ClearRenderTargetView(gPortal2RenderTarget, &gBackgroundColor.r);
+	gD3DContext->ClearDepthStencilView(gPortalDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 
 	// Setup the viewport for the portal texture size
@@ -637,6 +646,8 @@ void RenderScene()
 	vp2.TopLeftX = 0;
 	vp2.TopLeftY = 0;
 	gD3DContext->RSSetViewports(1, &vp);
+
+	RenderSceneFromCamera(gPortal2Camera);
     //-------------------------------------------------------------------------
 
 

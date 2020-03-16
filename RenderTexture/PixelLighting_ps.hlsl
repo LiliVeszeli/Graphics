@@ -16,7 +16,7 @@
 // Get used to people using the word "texture" and "map" interchangably.
 Texture2D    DiffuseSpecularMap : register(t0); // Textures here can contain a diffuse map (main colour) in their rgb channels and a specular
                                                 // map (shininess level) in their alpha channel. Repurposing the alpha channel means we can't use alpha blending
-                                                // The t0 indicates this texture is in slot 0 and the C++ code must load the texture into the this slot
+Texture2D    tv : register(t1);                                          // The t0 indicates this texture is in slot 0 and the C++ code must load the texture into the this slot
 SamplerState TexSampler : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic
 
 
@@ -28,6 +28,10 @@ SamplerState TexSampler : register(s0); // A sampler is a filter for a texture l
 // This shader just samples a diffuse texture map
 float4 main(LightingPixelShaderInput input) : SV_Target
 {
+
+	float3 tv = 2.0f * tv.Sample(TexSampler, input.uv).rgb - 1.0f;
+
+
     // Lighting equations
     input.worldNormal = normalize(input.worldNormal); // Normal might have been scaled by model scaling or interpolation so renormalise
     float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
