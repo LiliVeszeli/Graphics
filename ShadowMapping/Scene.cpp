@@ -348,13 +348,13 @@ bool InitScene()
     }
 
     gLights[0].colour = { 0.8f, 0.8f, 1.0f };
-    gLights[0].strength = 10;
+    gLights[0].strength = 20;
     gLights[0].model->SetPosition({ 30, 20, 0 });
     gLights[0].model->SetScale(pow(gLights[0].strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
 	gLights[0].model->FaceTarget(gCharacter->Position());
 
     gLights[1].colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1].strength = 40;
+    gLights[1].strength = 20;
     gLights[1].model->SetPosition({ -20, 30, 20 });
     gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
 	gLights[1].model->FaceTarget({ 0, 0, 0 });
@@ -535,6 +535,14 @@ void RenderScene()
     gPerFrameConstants.light1CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
     gPerFrameConstants.light1ViewMatrix       = CalculateLightViewMatrix(0);         // Calculate camera-like matrices for...
     gPerFrameConstants.light1ProjectionMatrix = CalculateLightProjectionMatrix(0);   //...lights to support shadow mapping
+
+    gPerFrameConstants.light2Colour = gLights[1].colour * gLights[1].strength;
+    gPerFrameConstants.light2Position = gLights[1].model->Position();
+    gPerFrameConstants.light2Facing = Normalise(gLights[1].model->WorldMatrix().GetZAxis());    // Additional lighting information for spotlights
+    gPerFrameConstants.light2CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
+    gPerFrameConstants.light2ViewMatrix = CalculateLightViewMatrix(1);         // Calculate camera-like matrices for...
+    gPerFrameConstants.light2ProjectionMatrix = CalculateLightProjectionMatrix(1);   //...lights to support shadow mapping
+
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
