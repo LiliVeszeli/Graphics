@@ -20,6 +20,8 @@ ID3D11PixelShader*  gPixelLightingPixelShader  = nullptr;
 ID3D11VertexShader* gBasicTransformVertexShader = nullptr; // Used before light model and depth-only pixel shader
 ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11PixelShader*  gDepthOnlyPixelShader  = nullptr;
+ID3D11VertexShader* gSphereVertexShader = nullptr;
+ID3D11PixelShader* gSpherePixelShader = nullptr;
 
 
 
@@ -38,6 +40,8 @@ bool LoadShaders()
     gBasicTransformVertexShader = LoadVertexShader("BasicTransform_vs");
     gLightModelPixelShader      = LoadPixelShader ("LightModel_ps");
     gDepthOnlyPixelShader       = LoadPixelShader ("DepthOnly_ps");
+    gSphereVertexShader = LoadVertexShader("Sphere_vs");
+    gSpherePixelShader = LoadPixelShader("Sphere_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr || gDepthOnlyPixelShader == nullptr)

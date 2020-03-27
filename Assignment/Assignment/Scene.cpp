@@ -41,11 +41,13 @@ Mesh* gCrateMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
 Mesh* gTeaPotMesh;
+Mesh* gSphereMesh;
 
 Model* gCharacter;
 Model* gCrate;
 Model* gGround;
 Model* gTeaPot;
+Model* gSphere;
 
 Camera* gCamera;
 
@@ -136,6 +138,9 @@ ID3D11ShaderResourceView* gGroundDiffuseSpecularMapSRV = nullptr;
 ID3D11Resource* gTeaPotDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gTeaPotDiffuseSpecularMapSRV = nullptr;
 
+ID3D11Resource* gSphereDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gSphereDiffuseSpecularMapSRV = nullptr;
+
 ID3D11Resource*           gLightDiffuseMap    = nullptr;
 ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
 
@@ -172,9 +177,10 @@ bool InitGeometry()
     {
         gCharacterMesh = new Mesh("Troll.x");
         gCrateMesh     = new Mesh("CargoContainer.x");
-        gGroundMesh    = new Mesh("Hills.x");
+        gGroundMesh    = new Mesh("Ground.x");
         gLightMesh     = new Mesh("Light.x");
         gTeaPotMesh = new Mesh("Teapot.x");
+        gSphereMesh = new Mesh("Sphere.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -213,6 +219,7 @@ bool InitGeometry()
         !LoadTexture("CargoA.dds",               &gCrateDiffuseSpecularMap,     &gCrateDiffuseSpecularMapSRV    ) ||
         !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
         !LoadTexture("porcelain.jpg", &gTeaPotDiffuseSpecularMap, &gTeaPotDiffuseSpecularMapSRV) ||
+        !LoadTexture("holo.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -391,6 +398,7 @@ bool InitScene()
     gCrate     = new Model(gCrateMesh);
     gGround    = new Model(gGroundMesh);
     gTeaPot = new Model(gTeaPotMesh);
+    gSphere = new Model(gSphereMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -400,6 +408,8 @@ bool InitScene()
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
     gTeaPot->SetPosition({ -10, 5, 50 });
+    gSphere->SetPosition({ -10, 5, -10 });
+    gSphere->SetScale(0.5f);
    
   
 
@@ -434,7 +444,7 @@ bool InitScene()
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 15, 30,-70 });
+    gCamera->SetPosition({ 10, 30,-80 });
     gCamera->SetRotation({ ToRadians(13), 0, 0 });
 
     return true;
@@ -468,6 +478,8 @@ void ReleaseResources()
     if (gCharacterDiffuseSpecularMap)    gCharacterDiffuseSpecularMap->Release();
     if (gTeaPotDiffuseSpecularMapSRV) gTeaPotDiffuseSpecularMapSRV->Release();
     if (gTeaPotDiffuseSpecularMap)    gTeaPotDiffuseSpecularMap->Release();
+    if (gSphereDiffuseSpecularMapSRV)     gSphereDiffuseSpecularMapSRV->Release();
+    if (gSphereDiffuseSpecularMap)        gSphereDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -484,12 +496,15 @@ void ReleaseResources()
     delete gCrate;     gCrate     = nullptr;
     delete gCharacter; gCharacter = nullptr;
     delete gTeaPot; gTeaPot = nullptr;
+    delete gSphere;     gSphere = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
     delete gCrateMesh;     gCrateMesh     = nullptr;
     delete gCharacterMesh; gCharacterMesh = nullptr;
     delete gTeaPotMesh; gTeaPotMesh = nullptr;
+    delete gSphereMesh;     gSphereMesh = nullptr;
+
 }
 
 
@@ -528,6 +543,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gCharacter->Render();
     gCrate->Render();
     gTeaPot->Render();
+    gSphere->Render();
 }
 
 
@@ -577,6 +593,8 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gTeaPotDiffuseSpecularMapSRV);
     gTeaPot->Render();
 
+    gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
+    gSphere->Render();
 
     //// Render lights ////
 
@@ -821,7 +839,13 @@ void UpdateScene(float frameTime)
     
     gLights[2].colour = { r/255, g/255, b/255 };
 
-
+    /*************************************************
+     * Title: Cycle RGB values as HUE
+     * Author: Lukas
+     * Date: 12/07/2012
+     * Code version: 1.0
+     * Availability: https://stackoverflow.com/questions/11458552/cycle-r-g-b-vales-as-hue
+     *************************************************/
 
     if (strengthIsZero == false)
     {
