@@ -76,7 +76,7 @@ const float gLightOrbitSpeed = 0.7f;
 // Spotlight data - using spotlights in this lab because shadow mapping needs to treat each light as a camera, which is easy with spotlights
 float gSpotlightConeAngle = 90.0f; // Spot light cone angle (degrees), like the FOV (field-of-view) of the spot light
 
-
+float gWiggle = 0;
 
 //--------------------------------------------------------------------------------------
 //**** Shadow Texture  ****//
@@ -593,7 +593,11 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gTeaPotDiffuseSpecularMapSRV);
     gTeaPot->Render();
 
+
+    gD3DContext->VSSetShader(gSphereVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
     gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
+
     gSphere->Render();
 
     //// Render lights ////

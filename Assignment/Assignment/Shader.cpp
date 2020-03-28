@@ -61,6 +61,8 @@ void ReleaseShaders()
     if (gBasicTransformVertexShader)  gBasicTransformVertexShader->Release();
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
+    if (gSphereVertexShader)   gSphereVertexShader->Release();
+    if (gSpherePixelShader)   gSpherePixelShader->Release();
 }
 
 
