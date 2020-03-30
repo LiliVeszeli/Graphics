@@ -22,6 +22,8 @@ ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11PixelShader*  gDepthOnlyPixelShader  = nullptr;
 ID3D11VertexShader* gSphereVertexShader = nullptr;
 ID3D11PixelShader* gSpherePixelShader = nullptr;
+ID3D11VertexShader* gCubeVertexShader = nullptr;
+ID3D11PixelShader* gCubePixelShader = nullptr;
 
 
 
@@ -42,6 +44,8 @@ bool LoadShaders()
     gDepthOnlyPixelShader       = LoadPixelShader ("DepthOnly_ps");
     gSphereVertexShader = LoadVertexShader("Sphere_vs");
     gSpherePixelShader = LoadPixelShader("Sphere_ps");
+    gCubeVertexShader = LoadVertexShader("Cube_vs");
+    gCubePixelShader = LoadPixelShader("Cube_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr || gDepthOnlyPixelShader == nullptr)
@@ -63,6 +67,8 @@ void ReleaseShaders()
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
     if (gSphereVertexShader)   gSphereVertexShader->Release();
     if (gSpherePixelShader)   gSpherePixelShader->Release();
+    if (gCubeVertexShader)   gSphereVertexShader->Release();
+    if (gCubePixelShader)   gSpherePixelShader->Release();
 }
 
 

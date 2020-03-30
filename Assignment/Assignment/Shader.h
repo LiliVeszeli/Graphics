@@ -22,6 +22,8 @@ extern ID3D11PixelShader*  gLightModelPixelShader;
 extern ID3D11PixelShader*  gDepthOnlyPixelShader;
 extern ID3D11VertexShader* gSphereVertexShader;
 extern ID3D11PixelShader* gSpherePixelShader;
+extern ID3D11VertexShader* gCubeVertexShader;
+extern ID3D11PixelShader* gCubePixelShader;
 
 
 //--------------------------------------------------------------------------------------

@@ -42,15 +42,19 @@ Mesh* gGroundMesh;
 Mesh* gLightMesh;
 Mesh* gTeaPotMesh;
 Mesh* gSphereMesh;
+Mesh* gCubeMesh;
 
 Model* gCharacter;
 Model* gCrate;
 Model* gGround;
 Model* gTeaPot;
 Model* gSphere;
+Model* gCube;
 
 Camera* gCamera;
-
+float wiggle;
+float change;
+float wiggleDirection = 1.0f;
 
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 3;
@@ -77,6 +81,8 @@ const float gLightOrbitSpeed = 0.7f;
 float gSpotlightConeAngle = 90.0f; // Spot light cone angle (degrees), like the FOV (field-of-view) of the spot light
 
 float gWiggle = 0;
+
+float gChange = 0;
 
 //--------------------------------------------------------------------------------------
 //**** Shadow Texture  ****//
@@ -141,6 +147,11 @@ ID3D11ShaderResourceView* gTeaPotDiffuseSpecularMapSRV = nullptr;
 ID3D11Resource* gSphereDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gSphereDiffuseSpecularMapSRV = nullptr;
 
+ID3D11Resource* gCube1DiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gCube1DiffuseSpecularMapSRV = nullptr;
+ID3D11Resource* gCube2DiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gCube2DiffuseSpecularMapSRV = nullptr;
+
 ID3D11Resource*           gLightDiffuseMap    = nullptr;
 ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
 
@@ -181,6 +192,7 @@ bool InitGeometry()
         gLightMesh     = new Mesh("Light.x");
         gTeaPotMesh = new Mesh("Teapot.x");
         gSphereMesh = new Mesh("Sphere.x");
+        gCubeMesh = new Mesh("Cube.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -217,9 +229,11 @@ bool InitGeometry()
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
     if (!LoadTexture("porcelain.jpg", &gCharacterDiffuseSpecularMap, &gCharacterDiffuseSpecularMapSRV) ||
         !LoadTexture("CargoA.dds",               &gCrateDiffuseSpecularMap,     &gCrateDiffuseSpecularMapSRV    ) ||
-        !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
+        !LoadTexture("GrassDiffuseSpecular1.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
         !LoadTexture("porcelain.jpg", &gTeaPotDiffuseSpecularMap, &gTeaPotDiffuseSpecularMapSRV) ||
         !LoadTexture("holo.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
+        !LoadTexture("mosaic.jpg", &gCube1DiffuseSpecularMap, &gCube1DiffuseSpecularMapSRV) ||
+        !LoadTexture("purple.jpg", &gCube2DiffuseSpecularMap, &gCube2DiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -399,6 +413,7 @@ bool InitScene()
     gGround    = new Model(gGroundMesh);
     gTeaPot = new Model(gTeaPotMesh);
     gSphere = new Model(gSphereMesh);
+    gCube = new Model(gCubeMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -407,9 +422,11 @@ bool InitScene()
 	gCrate-> SetPosition({ 40, 0, 30 });
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
-    gTeaPot->SetPosition({ -10, 5, 50 });
-    gSphere->SetPosition({ -10, 5, -10 });
+    gTeaPot->SetPosition({ -10, 3, 40 });
+    gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
+    gCube->SetPosition({ -16, 5, -10 });
+  
    
   
 
@@ -426,8 +443,8 @@ bool InitScene()
 	gLights[0].model->FaceTarget(gCharacter->Position());
 
     gLights[1].colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1].strength = 20;
-    gLights[1].model->SetPosition({ -20, 30, 20 });
+    gLights[1].strength = 40;
+    gLights[1].model->SetPosition({ -30, 30, 30 });
     gLights[1].model->SetScale(pow(15, 0.7f));
 	gLights[1].model->FaceTarget({ 0, 0, 0 });
 
@@ -435,7 +452,7 @@ bool InitScene()
 
     gLights[2].colour = {0, 0, 0};
     gLights[2].strength = 15;
-    gLights[2].model->SetPosition({ 30,25, -10 });
+    gLights[2].model->SetPosition({ 40,25, 0 });
     gLights[2].model->SetScale(pow(gLights[2].strength, 0.7f));
     gLights[2].model->FaceTarget({ 0, 0, 0 });
 
@@ -480,6 +497,10 @@ void ReleaseResources()
     if (gTeaPotDiffuseSpecularMap)    gTeaPotDiffuseSpecularMap->Release();
     if (gSphereDiffuseSpecularMapSRV)     gSphereDiffuseSpecularMapSRV->Release();
     if (gSphereDiffuseSpecularMap)        gSphereDiffuseSpecularMap->Release();
+    if (gCube1DiffuseSpecularMapSRV)     gCube1DiffuseSpecularMapSRV->Release();
+    if (gCube1DiffuseSpecularMap)        gCube1DiffuseSpecularMap->Release();
+    if (gCube2DiffuseSpecularMapSRV)     gCube2DiffuseSpecularMapSRV->Release();
+    if (gCube2DiffuseSpecularMap)        gCube2DiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -497,13 +518,14 @@ void ReleaseResources()
     delete gCharacter; gCharacter = nullptr;
     delete gTeaPot; gTeaPot = nullptr;
     delete gSphere;     gSphere = nullptr;
+    delete gCube;     gCube = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
     delete gCrateMesh;     gCrateMesh     = nullptr;
     delete gCharacterMesh; gCharacterMesh = nullptr;
     delete gTeaPotMesh; gTeaPotMesh = nullptr;
-    delete gSphereMesh;     gSphereMesh = nullptr;
+    delete gCubeMesh;     gCubeMesh = nullptr;
 
 }
 
@@ -544,6 +566,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gCrate->Render();
     gTeaPot->Render();
     gSphere->Render();
+    gCube->Render();
 }
 
 
@@ -599,6 +622,15 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
 
     gSphere->Render();
+
+    gD3DContext->VSSetShader(gCubeVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gCubePixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gCube1DiffuseSpecularMapSRV);
+    gD3DContext->PSSetShaderResources(1, 1, &gCube2DiffuseSpecularMapSRV);
+
+    gCube->Render();
+
+
 
     //// Render lights ////
 
@@ -660,6 +692,8 @@ void RenderScene()
     gPerFrameConstants.specularPower  = gSpecularPower;
     gPerFrameConstants.cameraPosition = gCamera->Position();
 
+    gPerFrameConstants.wiggle = wiggle;
+    gPerFrameConstants.change = change;
 
     //***************************************//
     //// Render from light's point of view ////
@@ -793,6 +827,21 @@ bool strengthIsZero = false;
 // Update models and camera. frameTime is the time passed since the last frame
 void UpdateScene(float frameTime)
 {
+
+    wiggle += frameTime;
+    change += frameTime/2 * wiggleDirection;
+
+    if (change > 1.0f)
+    {
+        change = 1.0f;
+        wiggleDirection = -1.0f;
+    }
+    if (change < 0)
+    {
+        change = 0;
+        wiggleDirection = 1.0f;
+    }
+
 	// Control sphere (will update its world matrix)
 	gCharacter->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
 
@@ -853,12 +902,12 @@ void UpdateScene(float frameTime)
 
     if (strengthIsZero == false)
     {
-        gLights[1].strength -= 0.07f;
+        gLights[1].strength -= 0.1f;
         gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
     }
     else
     {
-        gLights[1].strength += 0.07f;
+        gLights[1].strength += 0.1f;
         gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
     }
 
@@ -866,7 +915,7 @@ void UpdateScene(float frameTime)
     {
         strengthIsZero = true;
     }
-    if (gLights[1].strength > 15)
+    if (gLights[1].strength > 40)
     {
         strengthIsZero = false;
     }

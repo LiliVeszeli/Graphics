@@ -62,9 +62,9 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float4x4 gViewProjectionMatrix; // The above two matrices multiplied together to combine their effects
 
     float3   gLight1Position; // 3 floats: x, y z
-    float    padding1;        // Pad above variable to float4 (HLSL requirement - copied in the the C++ version of this structure)
+    float    wiggle;        // Pad above variable to float4 (HLSL requirement - copied in the the C++ version of this structure)
     float3   gLight1Colour;
-    float    padding2;
+    float    change;
     float3   gLight1Facing;           // Spotlight facing direction (normal)
     float    gLight1CosHalfAngle;     // cos(Spot light cone angle / 2). Precalculate in C++ the spotlight angle in this form to save doing in the shader
     float4x4 gLight1ViewMatrix;       // For shadow mapping we treat lights like cameras so we need camera matrices for them (prepared on the C++ side)

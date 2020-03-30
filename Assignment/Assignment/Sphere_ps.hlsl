@@ -1,12 +1,14 @@
 #include "Common.hlsli"
 
 Texture2D DiffuseMap : register(t0); // A diffuse map is the main texture for a model.
-                                        // The t0 indicates this texture is in slot 0 and the C++ code must load the texture into the this slot
+         
+
+// The t0 indicates this texture is in slot 0 and the C++ code must load the texture into the this slot
 SamplerState TexSampler : register(s0);
 
 float4 main(SimplePixelShaderInput input) : SV_Target
 {
-	
+	input.uv.x += wiggle;
 	
 	float3 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv).rgb;
 

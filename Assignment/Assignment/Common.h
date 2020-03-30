@@ -62,9 +62,9 @@ struct PerFrameConstants
     CMatrix4x4 viewProjectionMatrix; // The above two matrices multiplied together to combine their effects
 
     CVector3   light1Position; // 3 floats: x, y z
-    float      padding1;       // Pad above variable to float4 (HLSL requirement - which we must duplicate in this the C++ version of the structure)
+    float      wiggle;       // Pad above variable to float4 (HLSL requirement - which we must duplicate in this the C++ version of the structure)
     CVector3   light1Colour;
-    float      padding2;
+    float      change;
     CVector3   light1Facing;           // Spotlight facing direction (normal)
     float      light1CosHalfAngle;     // cos(Spot light cone angle / 2). Precalculate in C++ the spotlight angle in this form to save doing in the shader
     CMatrix4x4 light1ViewMatrix;       // For shadow mapping we treat lights like cameras so we need camera matrices for them (prepared on the C++ side)
