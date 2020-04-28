@@ -112,12 +112,23 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float    gLight3CosHalfAngle;
     float4x4 gLight3ViewMatrix;
     float4x4 gLight3ProjectionMatrix;
+    
+   
+    float3 gLight4Position;
+    float padding9;
+    float3 gLight4Colour;
+    float padding10;
+    float3 gLight4Facing;
+    float gLight4CosHalfAngle;
+    float4x4 gLight4ViewMatrix;
+    float4x4 gLight4ProjectionMatrix;
 
     float3   gAmbientColour;
     float    gSpecularPower;
 
     float3   gCameraPosition;
-    float    padding5;
+    float    gParallaxDepth;
+
 }
 // Note constant buffers are not structs: we don't use the name of the constant buffer, these are really just a collection of global variables (hence the 'g')
 

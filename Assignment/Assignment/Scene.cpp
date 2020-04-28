@@ -44,6 +44,7 @@ Mesh* gTeaPotMesh;
 Mesh* gSphereMesh;
 Mesh* gCubeMesh;
 Mesh* gCubeMeshNormal;
+Mesh* gParallaxMesh;
 
 Model* gCharacter;
 Model* gCrate;
@@ -52,6 +53,8 @@ Model* gTeaPot;
 Model* gSphere;
 Model* gCube;
 Model* gCubeNormal;
+Model* gParallax;
+Model* gSpecular;
 
 Camera* gCamera;
 float wiggle;
@@ -59,7 +62,7 @@ float change;
 float wiggleDirection = 1.0f;
 
 // Store lights in an array in this exercise
-const int NUM_LIGHTS = 3;
+const int NUM_LIGHTS = 4;
 struct Light
 {
     Model*   model;
@@ -71,7 +74,7 @@ Light gLights[NUM_LIGHTS];
 
 // Additional light information
 CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
-float    gSpecularPower = 256; // Specular power controls shininess - same for all models in this app
+float    gSpecularPower = 250.0f; // Specular power controls shininess - same for all models in this app
 
 ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
 
@@ -157,11 +160,18 @@ ID3D11ShaderResourceView* gCube2DiffuseSpecularMapSRV = nullptr;
 ID3D11Resource*           gLightDiffuseMap    = nullptr;
 ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
 
-ID3D11Resource* gCubeNormalDiffuseSpecularMap = nullptr; // This object represents the memory used by the texture on the GPU
-ID3D11ShaderResourceView* gCubeNormalDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
+ID3D11Resource* gCubeNormalDiffuseSpecularMap = nullptr; 
+ID3D11ShaderResourceView* gCubeNormalDiffuseSpecularMapSRV = nullptr; 
 ID3D11Resource* gCubeNormalMap = nullptr;
 ID3D11ShaderResourceView* gCubeNormalMapSRV = nullptr;
 
+ID3D11Resource* gParallaxDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gParallaxDiffuseSpecularMapSRV = nullptr;
+ID3D11Resource* gParallaxNormalHeightMap = nullptr;
+ID3D11ShaderResourceView* gParallaxNormalHeightMapSRV = nullptr;
+
+ID3D11Resource* gSpecularDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gSpecularDiffuseSpecularMapSRV = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -201,6 +211,8 @@ bool InitGeometry()
         gSphereMesh = new Mesh("Sphere.x");
         gCubeMesh = new Mesh("Cube.x");
         gCubeMeshNormal = new Mesh("Cube.x", true);
+        gParallaxMesh = new Mesh("Cube.x", true);
+        
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -244,6 +256,9 @@ bool InitGeometry()
         !LoadTexture("purple.jpg", &gCube2DiffuseSpecularMap, &gCube2DiffuseSpecularMapSRV) ||
         !LoadTexture("PatternDiffuseSpecular.dds", &gCubeNormalDiffuseSpecularMap, &gCubeNormalDiffuseSpecularMapSRV) ||
         !LoadTexture("PatternNormal.dds", &gCubeNormalMap, &gCubeNormalMapSRV) ||
+        !LoadTexture("PatternDiffuseSpecular.dds", &gParallaxDiffuseSpecularMap, &gParallaxDiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternNormalHeight.dds", &gParallaxNormalHeightMap, &gParallaxNormalHeightMapSRV) ||
+        !LoadTexture("StoneDiffuseSpecular.dds", &gSpecularDiffuseSpecularMap, &gSpecularDiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -425,6 +440,8 @@ bool InitScene()
     gSphere = new Model(gSphereMesh);
     gCube = new Model(gCubeMesh);
     gCubeNormal = new Model(gCubeMeshNormal);
+    gParallax = new Model(gParallaxMesh);
+    gSpecular = new Model(gCubeMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -433,11 +450,17 @@ bool InitScene()
 	gCrate-> SetPosition({ 40, 0, 30 });
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
-    gTeaPot->SetPosition({ -10, 0, 40 });
+    gTeaPot->SetPosition({ 0, 0, 40 });
     gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
     gCube->SetPosition({ -13, 5, -18 });
-    gCubeNormal->SetPosition({ -35, 5, 45 });
+    gCubeNormal->SetPosition({ -40, 5, 45 });
+    gParallax->SetPosition({ -24, 5, 40 });
+    gParallax->SetScale(0.8f);
+    gSpecular->SetPosition({-45,5,-5});
+    gSpecular->SetRotation({ 0,380,0 });
+
+    
   
    
   
@@ -468,6 +491,12 @@ bool InitScene()
     gLights[2].model->SetScale(pow(gLights[2].strength, 0.7f));
     gLights[2].model->FaceTarget({ 0, 0, 0 });
 
+
+    gLights[3].colour = { 0.8f, 0.8f, 1.0f };
+    gLights[3].strength = 10;
+    gLights[3].model->SetPosition({ -20, 10, 0 });
+    gLights[3].model->SetScale(pow(20, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[3].model->FaceTarget(gSpecular->Position());
   
 
     //// Set up camera ////
@@ -517,6 +546,12 @@ void ReleaseResources()
     if (gCubeNormalDiffuseSpecularMap)      gCubeNormalDiffuseSpecularMap->Release();
     if (gCubeNormalMapSRV)            gCubeNormalMapSRV->Release();
     if (gCubeNormalMap)               gCubeNormalMap->Release();
+    if (gParallaxDiffuseSpecularMapSRV) gParallaxDiffuseSpecularMapSRV->Release();
+    if (gParallaxDiffuseSpecularMap)    gParallaxDiffuseSpecularMap->Release();
+    if (gParallaxNormalHeightMapSRV)    gParallaxNormalHeightMapSRV->Release();
+    if (gParallaxNormalHeightMap)       gParallaxNormalHeightMap->Release();
+    if (gSpecularDiffuseSpecularMapSRV)     gSpecularDiffuseSpecularMapSRV->Release();
+    if (gSpecularDiffuseSpecularMap)        gSpecularDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -536,6 +571,9 @@ void ReleaseResources()
     delete gSphere;     gSphere = nullptr;
     delete gCube;     gCube = nullptr;
     delete gCubeNormal;     gCubeNormal = nullptr;
+    delete gParallax;     gParallax = nullptr;
+    delete gSpecular;     gSpecular = nullptr;
+
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
@@ -544,6 +582,7 @@ void ReleaseResources()
     delete gTeaPotMesh; gTeaPotMesh = nullptr;
     delete gCubeMesh;     gCubeMesh = nullptr;
     delete gCubeMeshNormal;     gCubeMeshNormal = nullptr;
+    delete gParallaxMesh;     gParallaxMesh = nullptr;
 
 }
 
@@ -586,6 +625,8 @@ void RenderDepthBufferFromLight(int lightIndex)
     gSphere->Render();
     gCube->Render();
     gCubeNormal->Render();
+    gParallax->Render();
+    gSpecular->Render();
 }
 
 
@@ -636,6 +677,15 @@ void RenderSceneFromCamera(Camera* camera)
     gTeaPot->Render();
 
 
+    gD3DContext->VSSetShader(gSpecularVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gSpecularPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gSpecularDiffuseSpecularMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+    gSpecular->Render();
+
+
+
+
     gD3DContext->VSSetShader(gSphereVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
     gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
@@ -657,6 +707,16 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     gCubeNormal->Render();
+
+
+    gD3DContext->VSSetShader(gParallaxVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gParallaxPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gParallaxDiffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetShaderResources(1, 1, &gParallaxNormalHeightMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+
+    // Render model, sets world matrix, vertex and index buffer and calls Draw on the GPU
+    gParallax->Render();
 
 
     //// Render lights ////
@@ -714,6 +774,12 @@ void RenderScene()
     gPerFrameConstants.light3ViewMatrix = CalculateLightViewMatrix(2);         // Calculate camera-like matrices for...
     gPerFrameConstants.light3ProjectionMatrix = CalculateLightProjectionMatrix(2);   //...lights to support shadow mapping
 
+    gPerFrameConstants.light4Colour = gLights[3].colour * gLights[3].strength;
+    gPerFrameConstants.light4Position = gLights[3].model->Position();
+    gPerFrameConstants.light4Facing = Normalise(gLights[3].model->WorldMatrix().GetZAxis());    // Additional lighting information for spotlights
+    gPerFrameConstants.light4CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
+    gPerFrameConstants.light4ViewMatrix = CalculateLightViewMatrix(3);         // Calculate camera-like matrices for...
+    gPerFrameConstants.light4ProjectionMatrix = CalculateLightProjectionMatrix(3);   //...lights to support shadow mapping
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
@@ -877,6 +943,8 @@ void UpdateScene(float frameTime)
     static bool go = true;
 	gLights[0].model->SetPosition( gCharacter->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
 	gLights[0].model->FaceTarget(gCharacter->Position());
+    gLights[3].model->SetPosition(gSpecular->Position() + CVector3{ cos(rotate) * gLightOrbit, 1, sin(rotate) * gLightOrbit });
+    gLights[3].model->FaceTarget(gSpecular->Position());
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 

@@ -330,7 +330,7 @@ void RenderScene()
     // Continue using the same shaders and states, so no need to set them again 
 
     // Select the cube texture and sampler to use in the pixel shader
-    gD3DContext->PSSetShaderResources(0, 1, &gCubeDiffuseMapSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetShaderResources(0, 1, &gCubeDiffuseMapSRV); // First parameter must match texture slot number in the shader
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     // Render model, sets world matrix, vertex and index buffer and calls Draw on the GPU

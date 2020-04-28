@@ -26,6 +26,10 @@ extern ID3D11VertexShader* gCubeVertexShader;
 extern ID3D11PixelShader* gCubePixelShader;
 extern ID3D11VertexShader* gNormalMappingVertexShader;
 extern ID3D11PixelShader* gNormalMappingPixelShader;
+extern ID3D11VertexShader* gParallaxVertexShader;
+extern ID3D11PixelShader*  gParallaxPixelShader;
+extern ID3D11VertexShader* gSpecularVertexShader;
+extern ID3D11PixelShader*  gSpecularPixelShader;
 
 
 //--------------------------------------------------------------------------------------

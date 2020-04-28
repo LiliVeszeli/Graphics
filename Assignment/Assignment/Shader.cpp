@@ -21,11 +21,15 @@ ID3D11VertexShader* gBasicTransformVertexShader = nullptr; // Used before light 
 ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11PixelShader*  gDepthOnlyPixelShader  = nullptr;
 ID3D11VertexShader* gSphereVertexShader = nullptr;
-ID3D11PixelShader* gSpherePixelShader = nullptr;
+ID3D11PixelShader*  gSpherePixelShader = nullptr;
 ID3D11VertexShader* gCubeVertexShader = nullptr;
-ID3D11PixelShader* gCubePixelShader = nullptr;
+ID3D11PixelShader*  gCubePixelShader = nullptr;
 ID3D11VertexShader* gNormalMappingVertexShader = nullptr;
-ID3D11PixelShader* gNormalMappingPixelShader = nullptr;
+ID3D11PixelShader*  gNormalMappingPixelShader = nullptr;
+ID3D11VertexShader* gParallaxVertexShader = nullptr;
+ID3D11PixelShader*  gParallaxPixelShader = nullptr;
+ID3D11VertexShader* gSpecularVertexShader = nullptr;
+ID3D11PixelShader*  gSpecularPixelShader = nullptr;
 
 
 
@@ -50,6 +54,10 @@ bool LoadShaders()
     gCubePixelShader = LoadPixelShader("Cube_ps");
     gNormalMappingVertexShader = LoadVertexShader("NormalMapping_vs"); 
     gNormalMappingPixelShader = LoadPixelShader("NormalMapping_ps");
+    gParallaxVertexShader = LoadVertexShader("Parallax_vs");
+    gParallaxPixelShader = LoadPixelShader("Parallax_ps");
+    gSpecularVertexShader = LoadVertexShader("Specular_vs");
+    gSpecularPixelShader = LoadPixelShader("Specular_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr || gDepthOnlyPixelShader == nullptr)
@@ -75,7 +83,11 @@ void ReleaseShaders()
     if (gCubePixelShader)   gSpherePixelShader->Release();
     if (gNormalMappingVertexShader)  gNormalMappingVertexShader->Release();
     if (gNormalMappingPixelShader)   gNormalMappingPixelShader->Release();
-}
+    if (gParallaxVertexShader)  gParallaxVertexShader->Release();
+    if (gParallaxPixelShader)   gParallaxPixelShader->Release();
+    if (gSpecularVertexShader)  gSpecularVertexShader->Release();
+    if (gSpecularPixelShader)   gSpecularPixelShader->Release();
+}        
 
 
 
