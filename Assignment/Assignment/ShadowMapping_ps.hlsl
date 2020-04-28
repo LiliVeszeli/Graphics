@@ -18,8 +18,8 @@ Texture2D DiffuseSpecularMap : register(t0); // Textures here can contain a diff
 SamplerState TexSampler      : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
 
 Texture2D ShadowMapLight1 : register(t1); // Texture holding the view of the scene from a light
-Texture2D ShadowMapLight2 : register(t2);
-Texture2D ShadowMapLight3 : register(t3);
+//Texture2D ShadowMapLight2 : register(t2);
+//Texture2D ShadowMapLight3 : register(t3);
 
 SamplerState PointClamp   : register(s1); // No filtering for shadow maps (you might think you could use trilinear or similar, but it will filter light depths not the shadows cast...)
 

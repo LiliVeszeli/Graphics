@@ -43,6 +43,7 @@ Mesh* gLightMesh;
 Mesh* gTeaPotMesh;
 Mesh* gSphereMesh;
 Mesh* gCubeMesh;
+Mesh* gCubeMeshNormal;
 
 Model* gCharacter;
 Model* gCrate;
@@ -50,6 +51,7 @@ Model* gGround;
 Model* gTeaPot;
 Model* gSphere;
 Model* gCube;
+Model* gCubeNormal;
 
 Camera* gCamera;
 float wiggle;
@@ -155,6 +157,11 @@ ID3D11ShaderResourceView* gCube2DiffuseSpecularMapSRV = nullptr;
 ID3D11Resource*           gLightDiffuseMap    = nullptr;
 ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
 
+ID3D11Resource* gCubeNormalDiffuseSpecularMap = nullptr; // This object represents the memory used by the texture on the GPU
+ID3D11ShaderResourceView* gCubeNormalDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
+ID3D11Resource* gCubeNormalMap = nullptr;
+ID3D11ShaderResourceView* gCubeNormalMapSRV = nullptr;
+
 
 
 //--------------------------------------------------------------------------------------
@@ -193,6 +200,7 @@ bool InitGeometry()
         gTeaPotMesh = new Mesh("Teapot.x");
         gSphereMesh = new Mesh("Sphere.x");
         gCubeMesh = new Mesh("Cube.x");
+        gCubeMeshNormal = new Mesh("Cube.x", true);
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -234,6 +242,8 @@ bool InitGeometry()
         !LoadTexture("holo.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
         !LoadTexture("mosaic.jpg", &gCube1DiffuseSpecularMap, &gCube1DiffuseSpecularMapSRV) ||
         !LoadTexture("purple.jpg", &gCube2DiffuseSpecularMap, &gCube2DiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternDiffuseSpecular.dds", &gCubeNormalDiffuseSpecularMap, &gCubeNormalDiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternNormal.dds", &gCubeNormalMap, &gCubeNormalMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -414,6 +424,7 @@ bool InitScene()
     gTeaPot = new Model(gTeaPotMesh);
     gSphere = new Model(gSphereMesh);
     gCube = new Model(gCubeMesh);
+    gCubeNormal = new Model(gCubeMeshNormal);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -422,10 +433,11 @@ bool InitScene()
 	gCrate-> SetPosition({ 40, 0, 30 });
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
-    gTeaPot->SetPosition({ -10, 3, 40 });
+    gTeaPot->SetPosition({ -10, 0, 40 });
     gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
-    gCube->SetPosition({ -16, 5, -10 });
+    gCube->SetPosition({ -13, 5, -18 });
+    gCubeNormal->SetPosition({ -35, 5, 45 });
   
    
   
@@ -501,6 +513,10 @@ void ReleaseResources()
     if (gCube1DiffuseSpecularMap)        gCube1DiffuseSpecularMap->Release();
     if (gCube2DiffuseSpecularMapSRV)     gCube2DiffuseSpecularMapSRV->Release();
     if (gCube2DiffuseSpecularMap)        gCube2DiffuseSpecularMap->Release();
+    if (gCubeNormalDiffuseSpecularMapSRV)   gCubeNormalDiffuseSpecularMapSRV->Release();
+    if (gCubeNormalDiffuseSpecularMap)      gCubeNormalDiffuseSpecularMap->Release();
+    if (gCubeNormalMapSRV)            gCubeNormalMapSRV->Release();
+    if (gCubeNormalMap)               gCubeNormalMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -519,6 +535,7 @@ void ReleaseResources()
     delete gTeaPot; gTeaPot = nullptr;
     delete gSphere;     gSphere = nullptr;
     delete gCube;     gCube = nullptr;
+    delete gCubeNormal;     gCubeNormal = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
@@ -526,6 +543,7 @@ void ReleaseResources()
     delete gCharacterMesh; gCharacterMesh = nullptr;
     delete gTeaPotMesh; gTeaPotMesh = nullptr;
     delete gCubeMesh;     gCubeMesh = nullptr;
+    delete gCubeMeshNormal;     gCubeMeshNormal = nullptr;
 
 }
 
@@ -567,6 +585,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gTeaPot->Render();
     gSphere->Render();
     gCube->Render();
+    gCubeNormal->Render();
 }
 
 
@@ -630,6 +649,14 @@ void RenderSceneFromCamera(Camera* camera)
 
     gCube->Render();
 
+    // Select the cube texture and sampler to use in the pixel shader
+    gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gNormalMappingPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gCubeNormalDiffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
+    gD3DContext->PSSetShaderResources(1, 1, &gCubeNormalMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+
+    gCubeNormal->Render();
 
 
     //// Render lights ////
