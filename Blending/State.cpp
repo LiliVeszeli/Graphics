@@ -157,7 +157,9 @@ bool CreateStates()
 
   ////**** Create more blend states here, just copy and adjust the code above ****////
 
-  blendDesc.RenderTarget[0].BlendEnable = TRUE;              // additive blending
+  // additive blending-------------------------------------------------------------------
+
+  blendDesc.RenderTarget[0].BlendEnable = TRUE;              
   blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;      // How to blend the source (texture colour) - See lab notes
   blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;     // How to blend the destination (colour already on screen) - See lab notes
   blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;   // How to combine the above two, almost always ADD, leave this alone.

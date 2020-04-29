@@ -30,6 +30,7 @@ extern ID3D11VertexShader* gParallaxVertexShader;
 extern ID3D11PixelShader*  gParallaxPixelShader;
 extern ID3D11VertexShader* gSpecularVertexShader;
 extern ID3D11PixelShader*  gSpecularPixelShader;
+extern ID3D11PixelShader* gBlendingPixelShader;
 
 
 //--------------------------------------------------------------------------------------

@@ -55,6 +55,7 @@ Model* gCube;
 Model* gCubeNormal;
 Model* gParallax;
 Model* gSpecular;
+Model* gMul;
 
 Camera* gCamera;
 float wiggle;
@@ -173,6 +174,10 @@ ID3D11ShaderResourceView* gParallaxNormalHeightMapSRV = nullptr;
 ID3D11Resource* gSpecularDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gSpecularDiffuseSpecularMapSRV = nullptr;
 
+ID3D11Resource* gMulDiffuseMap = nullptr;
+ID3D11ShaderResourceView* gMulDiffuseMapSRV = nullptr;
+
+
 
 //--------------------------------------------------------------------------------------
 // Light Helper Functions
@@ -212,6 +217,7 @@ bool InitGeometry()
         gCubeMesh = new Mesh("Cube.x");
         gCubeMeshNormal = new Mesh("Cube.x", true);
         gParallaxMesh = new Mesh("Cube.x", true);
+       
         
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
@@ -259,6 +265,7 @@ bool InitGeometry()
         !LoadTexture("PatternDiffuseSpecular.dds", &gParallaxDiffuseSpecularMap, &gParallaxDiffuseSpecularMapSRV) ||
         !LoadTexture("PatternNormalHeight.dds", &gParallaxNormalHeightMap, &gParallaxNormalHeightMapSRV) ||
         !LoadTexture("StoneDiffuseSpecular.dds", &gSpecularDiffuseSpecularMap, &gSpecularDiffuseSpecularMapSRV) ||
+        !LoadTexture("Glass.jpg", &gMulDiffuseMap, &gMulDiffuseMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -442,6 +449,7 @@ bool InitScene()
     gCubeNormal = new Model(gCubeMeshNormal);
     gParallax = new Model(gParallaxMesh);
     gSpecular = new Model(gCubeMesh);
+    gMul = new Model(gCubeMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -459,6 +467,8 @@ bool InitScene()
     gParallax->SetScale(0.8f);
     gSpecular->SetPosition({-45,5,-5});
     gSpecular->SetRotation({ 0,380,0 });
+    gMul->SetPosition({ 13, 2, -5 });
+    gMul->SetScale(0.35f);
 
     
   
@@ -552,6 +562,8 @@ void ReleaseResources()
     if (gParallaxNormalHeightMap)       gParallaxNormalHeightMap->Release();
     if (gSpecularDiffuseSpecularMapSRV)     gSpecularDiffuseSpecularMapSRV->Release();
     if (gSpecularDiffuseSpecularMap)        gSpecularDiffuseSpecularMap->Release();
+    if (gMulDiffuseMapSRV)             gMulDiffuseMapSRV->Release();
+    if (gMulDiffuseMap)                gMulDiffuseMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -573,6 +585,7 @@ void ReleaseResources()
     delete gCubeNormal;     gCubeNormal = nullptr;
     delete gParallax;     gParallax = nullptr;
     delete gSpecular;     gSpecular = nullptr;
+    delete gMul;     gMul = nullptr;
 
 
     delete gLightMesh;     gLightMesh     = nullptr;
@@ -627,13 +640,14 @@ void RenderDepthBufferFromLight(int lightIndex)
     gCubeNormal->Render();
     gParallax->Render();
     gSpecular->Render();
+   //gMul->Render();
 }
 
 
 
 // Render everything in the scene from the given camera
 // This code is common between rendering the main scene and rendering the scene in the portal
-// See RenderScene function below
+// See RenderScene function ow
 void RenderSceneFromCamera(Camera* camera)
 {
     // Set camera matrices in the constant buffer and send over to GPU
@@ -719,6 +733,17 @@ void RenderSceneFromCamera(Camera* camera)
     gParallax->Render();
 
 
+    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gBlendingPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gMulDiffuseMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gTrilinearSampler);
+
+    gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
+    gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
+    gD3DContext->RSSetState(gCullNoneState);
+
+    gMul->Render();
+
     //// Render lights ////
 
     // Select which shaders to use next
@@ -729,7 +754,6 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gLightDiffuseMapSRV); // First parameter must match texture slot number in the shaer
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
-    // States - additive blending, read-only depth buffer and no culling (standard set-up for blending
     gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
     gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
     gD3DContext->RSSetState(gCullNoneState);
