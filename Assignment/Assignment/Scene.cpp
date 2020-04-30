@@ -57,6 +57,7 @@ Model* gParallax;
 Model* gSpecular;
 Model* gMul;
 Model* gAdd;
+Model* gAlphaTest;
 Model* gCubeMap;
 
 Camera* gCamera;
@@ -182,6 +183,9 @@ ID3D11ShaderResourceView* gMulDiffuseMapSRV = nullptr;
 ID3D11Resource* gAddDiffuseMap = nullptr;
 ID3D11ShaderResourceView* gAddDiffuseMapSRV = nullptr;
 
+ID3D11Resource* gAlphaTestDiffuseMap = nullptr;
+ID3D11ShaderResourceView* gAlphaTestDiffuseMapSRV = nullptr;
+
 ID3D11Resource* gCubeMapDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gCubeMapDiffuseSpecularMapSRV = nullptr;
 
@@ -276,7 +280,8 @@ bool InitGeometry()
         !LoadTexture("StoneDiffuseSpecular.dds", &gSpecularDiffuseSpecularMap, &gSpecularDiffuseSpecularMapSRV) ||
         !LoadTexture("Glass.jpg", &gMulDiffuseMap, &gMulDiffuseMapSRV) ||
         !LoadTexture("FireAdd.png", &gAddDiffuseMap, &gAddDiffuseMapSRV) ||
-        !LoadTexture("sg.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
+        !LoadTexture("moogle.png", &gAlphaTestDiffuseMap, &gAlphaTestDiffuseMapSRV) ||
+       // !LoadTexture("sunset.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -366,6 +371,7 @@ bool InitScene()
     gMul = new Model(gCubeMesh);
     gAdd = new Model(gCubeMesh);
     gCubeMap = new Model(gCubeMesh);
+    gAlphaTest = new Model(gCubeMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -386,6 +392,8 @@ bool InitScene()
     gMul->SetPosition({ 25, 5, -25 });
     gMul->SetScale(0.7f);
     gAdd->SetPosition({40, 21, 30});
+    gAlphaTest->SetPosition({-29, 5.5f, -15});
+    gAlphaTest->SetScale(0.8f);
 
     gCubeMap->SetPosition({ 0, 5, -25 });
 
@@ -491,6 +499,8 @@ void ReleaseResources()
     if (gMulDiffuseMap)                gMulDiffuseMap->Release();
     if (gAddDiffuseMapSRV)             gAddDiffuseMapSRV->Release();
     if (gAddDiffuseMap)                gAddDiffuseMap->Release();
+    if (gAlphaTestDiffuseMapSRV)             gAlphaTestDiffuseMapSRV->Release();
+    if (gAlphaTestDiffuseMap)                gAlphaTestDiffuseMap->Release();
     if (gCubeMapDiffuseSpecularMapSRV)     gCubeMapDiffuseSpecularMapSRV->Release();
     if (gCubeMapDiffuseSpecularMap)        gCubeMapDiffuseSpecularMap->Release();
 
@@ -516,6 +526,7 @@ void ReleaseResources()
     delete gSpecular;     gSpecular = nullptr;
     delete gMul;     gMul = nullptr;
     delete gAdd;     gAdd = nullptr;
+    delete gAlphaTest;     gAlphaTest = nullptr;
     delete gCubeMap;     gCubeMap = nullptr;
 
 
@@ -666,6 +677,15 @@ void RenderSceneFromCamera(Camera* camera)
     // Render model, sets world matrix, vertex and index buffer and calls Draw on the GPU
     gParallax->Render();
 
+    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gAlphaTestingPixelShader, nullptr, 0);
+    gD3DContext->OMSetBlendState(gNoBlendingState, nullptr, 0xffffff);
+    gD3DContext->PSSetShaderResources(0, 1, &gAlphaTestDiffuseMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gTrilinearSampler);
+
+    gD3DContext->RSSetState(gCullNoneState);
+
+    gAlphaTest->Render();
 
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gBlendingPixelShader, nullptr, 0);
@@ -689,6 +709,9 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->RSSetState(gCullNoneState);
 
     gAdd->Render();
+
+
+  
 
     //// Render lights ////
 
@@ -915,6 +938,7 @@ void UpdateScene(float frameTime)
 
 	// Control sphere (will update its world matrix)
 	gCharacter->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+    gAlphaTest->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
 
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	static float rotate = 0.0f;

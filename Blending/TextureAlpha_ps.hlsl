@@ -38,6 +38,11 @@ float4 main(PixelShaderInput input) : SV_Target
     // IMPORTANT: in this lab we get a float4 from the texture: R, G, B & A since we will be using alpha blending and cutout sprites
     //            that contain data in the alpha channel. For non-alpha textures we usually just get a float3 RGB and just use 1 for alpha
     float4 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv);
+    
+    if (diffuseMapColour.a < 0.5)
+    {
+        discard;
+    }
 
-    return diffuseMapColour;
+        return diffuseMapColour;
 }

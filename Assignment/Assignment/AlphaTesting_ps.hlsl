@@ -1,8 +1,10 @@
+
+
 #include "Common.hlsli" // Shaders can also use include files - note the extension
 
 
-Texture2D DiffuseMap : register(t0); 
-SamplerState TexSampler : register(s0); 
+Texture2D DiffuseMap : register(t0);
+SamplerState TexSampler : register(s0);
 
 
 //--------------------------------------------------------------------------------------
@@ -15,6 +17,10 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 {
     float4 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv);
     
+   if (diffuseMapColour.a < 0.5)
+   {
+       discard;
+   }
   
 
         return diffuseMapColour;

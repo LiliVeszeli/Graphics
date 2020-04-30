@@ -236,7 +236,7 @@ bool InitGeometry()
     // This function requires you to pass a ID3D11Resource* (e.g. &gTilesDiffuseMap), which manages the GPU memory for the
     // texture and also a ID3D11ShaderResourceView* (e.g. &gTilesDiffuseMapSRV), which allows us to use the texture in shaders
     // The function will fill in these pointers with usable data. The variables are globals and can be found near the top of the file.
-    if (FAILED(DirectX::CreateWICTextureFromFile(gD3DDevice, gD3DContext, L"smoke.png", &gCubeDiffuseMap,  &gCubeDiffuseMapSRV )) ||
+    if (FAILED(DirectX::CreateWICTextureFromFile(gD3DDevice, gD3DContext, L"moogle.png", &gCubeDiffuseMap,  &gCubeDiffuseMapSRV )) ||
         FAILED(DirectX::CreateWICTextureFromFile(gD3DDevice, gD3DContext, L"wood2.jpg",  &gFloorDiffuseMap, &gFloorDiffuseMapSRV)))
     {
         gLastError = "Error loading textures";
@@ -409,8 +409,8 @@ void RenderScene()
 
     ////**** Select the blending state to use for rendering ****////
     // Also set the depth buffer to normal usage and hide back faces
-    gD3DContext->OMSetBlendState(gAlphaBlending, nullptr, 0xffffff);
-    gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
+   // gD3DContext->OMSetBlendState(gAlphaBlending, nullptr, 0xffffff);
+   // gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
     gD3DContext->RSSetState(gCullNoneState);
 
     // Draw the geometry using an index buffer
