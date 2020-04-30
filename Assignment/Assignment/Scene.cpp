@@ -45,6 +45,7 @@ Mesh* gSphereMesh;
 Mesh* gCubeMesh;
 Mesh* gCubeMeshNormal;
 Mesh* gParallaxMesh;
+Mesh* gPortalMesh;
 
 Model* gCharacter;
 Model* gCrate;
@@ -59,6 +60,7 @@ Model* gMul;
 Model* gAdd;
 Model* gAlphaTest;
 Model* gCubeMap;
+Model* gSecret;
 
 Camera* gCamera;
 float wiggle;
@@ -186,6 +188,10 @@ ID3D11ShaderResourceView* gAddDiffuseMapSRV = nullptr;
 ID3D11Resource* gAlphaTestDiffuseMap = nullptr;
 ID3D11ShaderResourceView* gAlphaTestDiffuseMapSRV = nullptr;
 
+ID3D11Resource* gSecretDiffuseMap = nullptr;
+ID3D11ShaderResourceView* gSecretDiffuseMapSRV = nullptr;
+
+
 ID3D11Resource* gCubeMapDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gCubeMapDiffuseSpecularMapSRV = nullptr;
 
@@ -230,6 +236,7 @@ bool InitGeometry()
         gCubeMesh = new Mesh("Cube.x");
         gCubeMeshNormal = new Mesh("Cube.x", true);
         gParallaxMesh = new Mesh("Cube.x", true);
+        gPortalMesh = new Mesh("Portal.x");
        
         
     }
@@ -280,7 +287,8 @@ bool InitGeometry()
         !LoadTexture("StoneDiffuseSpecular.dds", &gSpecularDiffuseSpecularMap, &gSpecularDiffuseSpecularMapSRV) ||
         !LoadTexture("Glass.jpg", &gMulDiffuseMap, &gMulDiffuseMapSRV) ||
         !LoadTexture("FireAdd.png", &gAddDiffuseMap, &gAddDiffuseMapSRV) ||
-        !LoadTexture("moogle.png", &gAlphaTestDiffuseMap, &gAlphaTestDiffuseMapSRV) ||
+        !LoadTexture("wizard.png", &gAlphaTestDiffuseMap, &gAlphaTestDiffuseMapSRV) ||
+        !LoadTexture("secret.png", &gSecretDiffuseMap, &gSecretDiffuseMapSRV) ||
        // !LoadTexture("sunset.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
@@ -372,6 +380,7 @@ bool InitScene()
     gAdd = new Model(gCubeMesh);
     gCubeMap = new Model(gCubeMesh);
     gAlphaTest = new Model(gCubeMesh);
+    gSecret = new Model(gPortalMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -394,6 +403,9 @@ bool InitScene()
     gAdd->SetPosition({40, 21, 30});
     gAlphaTest->SetPosition({-29, 5.5f, -15});
     gAlphaTest->SetScale(0.8f);
+    gSecret->SetPosition({ 25, 2, -25 });
+    gSecret->SetScale(0.1);
+    gSecret->SetRotation({300, 0, 400});
 
     gCubeMap->SetPosition({ 0, 5, -25 });
 
@@ -499,6 +511,8 @@ void ReleaseResources()
     if (gMulDiffuseMap)                gMulDiffuseMap->Release();
     if (gAddDiffuseMapSRV)             gAddDiffuseMapSRV->Release();
     if (gAddDiffuseMap)                gAddDiffuseMap->Release();
+    if (gSecretDiffuseMapSRV)             gSecretDiffuseMapSRV->Release();
+    if (gSecretDiffuseMap)                gSecretDiffuseMap->Release();
     if (gAlphaTestDiffuseMapSRV)             gAlphaTestDiffuseMapSRV->Release();
     if (gAlphaTestDiffuseMap)                gAlphaTestDiffuseMap->Release();
     if (gCubeMapDiffuseSpecularMapSRV)     gCubeMapDiffuseSpecularMapSRV->Release();
@@ -526,6 +540,7 @@ void ReleaseResources()
     delete gSpecular;     gSpecular = nullptr;
     delete gMul;     gMul = nullptr;
     delete gAdd;     gAdd = nullptr;
+    delete gSecret;     gSecret = nullptr;
     delete gAlphaTest;     gAlphaTest = nullptr;
     delete gCubeMap;     gCubeMap = nullptr;
 
@@ -634,6 +649,11 @@ void RenderSceneFromCamera(Camera* camera)
 
     gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
     gCubeMap->Render();
+
+   
+    gD3DContext->PSSetShaderResources(0, 1, &gSecretDiffuseMapSRV);
+    gSecret->Render();
+
 
 
     gD3DContext->VSSetShader(gSpecularVertexShader, nullptr, 0);
@@ -811,41 +831,6 @@ void RenderScene()
 
 	RenderDepthBufferFromLight(0);
 
-	
-	//vp.Width = static_cast<FLOAT>(gShadowMapSize);
-	//vp.Height = static_cast<FLOAT>(gShadowMapSize);
-	//vp.MinDepth = 0.0f;
-	//vp.MaxDepth = 1.0f;
-	//vp.TopLeftX = 0;
-	//vp.TopLeftY = 0;
-	//gD3DContext->RSSetViewports(1, &vp);
-
-	//// Select the shadow map texture as the current depth buffer. We will not be rendering any pixel colours
-	//// Also clear the the shadow map depth buffer to the far distance
-	//gD3DContext->OMSetRenderTargets(0, nullptr, gShadowMap2DepthStencil);
-	//gD3DContext->ClearDepthStencilView(gShadowMap2DepthStencil, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
- //   // Render the scene from the point of view of light 1 (only depth values written)
- //   RenderDepthBufferFromLight(1);
-
-
-
- //   vp.Width = static_cast<FLOAT>(gShadowMapSize);
- //   vp.Height = static_cast<FLOAT>(gShadowMapSize);
- //   vp.MinDepth = 0.0f;
- //   vp.MaxDepth = 1.0f;
- //   vp.TopLeftX = 0;
- //   vp.TopLeftY = 0;
- //   gD3DContext->RSSetViewports(1, &vp);
-
- //   // Select the shadow map texture as the current depth buffer. We will not be rendering any pixel colours
- //   // Also clear the the shadow map depth buffer to the far distance
- //   gD3DContext->OMSetRenderTargets(0, nullptr, gShadowMap3DepthStencil);
- //   gD3DContext->ClearDepthStencilView(gShadowMap3DepthStencil, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
- //   // Render the scene from the point of view of light 1 (only depth values written)
- //   RenderDepthBufferFromLight(2);
-
 
     //**************************//
 
@@ -876,9 +861,6 @@ void RenderScene()
     gD3DContext->PSSetShaderResources(1, 1, &gShadowMap1SRV);
     gD3DContext->PSSetSamplers(1, 1, &gPointSampler);
 
-	/*gD3DContext->PSSetShaderResources(2, 1, &gShadowMap2SRV);
-
-    gD3DContext->PSSetShaderResources(3, 1, &gShadowMap3SRV);*/
 
 
     // Render the scene for the main window
@@ -889,12 +871,7 @@ void RenderScene()
     gD3DContext->PSSetShaderResources(1, 1, &nullView);
 
 
-    //*****************************//
-    // Temporary demonstration code for visualising the light's view of the scene
-    //ColourRGBA white = {1,1,1};
-    //gD3DContext->ClearRenderTargetView(gBackBufferRenderTarget, &white.r);
-    //RenderDepthBufferFromLight(0);
-    //*****************************//
+
 
 
     //// Scene completion ////
@@ -937,7 +914,7 @@ void UpdateScene(float frameTime)
     }
 
 	// Control sphere (will update its world matrix)
-	gCharacter->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	//gCharacter->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
     gAlphaTest->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
 
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
