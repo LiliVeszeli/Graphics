@@ -56,6 +56,8 @@ Model* gCubeNormal;
 Model* gParallax;
 Model* gSpecular;
 Model* gMul;
+Model* gAdd;
+Model* gCubeMap;
 
 Camera* gCamera;
 float wiggle;
@@ -63,7 +65,7 @@ float change;
 float wiggleDirection = 1.0f;
 
 // Store lights in an array in this exercise
-const int NUM_LIGHTS = 4;
+const int NUM_LIGHTS = 5;
 struct Light
 {
     Model*   model;
@@ -177,6 +179,13 @@ ID3D11ShaderResourceView* gSpecularDiffuseSpecularMapSRV = nullptr;
 ID3D11Resource* gMulDiffuseMap = nullptr;
 ID3D11ShaderResourceView* gMulDiffuseMapSRV = nullptr;
 
+ID3D11Resource* gAddDiffuseMap = nullptr;
+ID3D11ShaderResourceView* gAddDiffuseMapSRV = nullptr;
+
+ID3D11Resource* gCubeMapDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gCubeMapDiffuseSpecularMapSRV = nullptr;
+
+
 
 
 //--------------------------------------------------------------------------------------
@@ -266,6 +275,8 @@ bool InitGeometry()
         !LoadTexture("PatternNormalHeight.dds", &gParallaxNormalHeightMap, &gParallaxNormalHeightMapSRV) ||
         !LoadTexture("StoneDiffuseSpecular.dds", &gSpecularDiffuseSpecularMap, &gSpecularDiffuseSpecularMapSRV) ||
         !LoadTexture("Glass.jpg", &gMulDiffuseMap, &gMulDiffuseMapSRV) ||
+        !LoadTexture("FireAdd.png", &gAddDiffuseMap, &gAddDiffuseMapSRV) ||
+        !LoadTexture("sg.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -323,103 +334,6 @@ bool InitGeometry()
 
 
 
-	//2
-
-	// We also need a depth buffer to go with our portal
-	//textureDesc = {};
-	//textureDesc.Width = gShadowMapSize; // Size of the shadow map determines quality / resolution of shadows
-	//textureDesc.Height = gShadowMapSize;
-	//textureDesc.MipLevels = 1; // 1 level, means just the main texture, no additional mip-maps. Usually don't use mip-maps when rendering to textures (or we would have to render every level)
-	//textureDesc.ArraySize = 1;
-	//textureDesc.Format = DXGI_FORMAT_R32_TYPELESS; // The shadow map contains a single 32-bit value [tech gotcha: have to say typeless because depth buffer and shaders see things slightly differently]
-	//textureDesc.SampleDesc.Count = 1;
-	//textureDesc.SampleDesc.Quality = 0;
-	//textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	//textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE; // Indicate we will use texture as a depth buffer and also pass it to shaders
-	//textureDesc.CPUAccessFlags = 0;
-	//textureDesc.MiscFlags = 0;
-	//if (FAILED(gD3DDevice->CreateTexture2D(&textureDesc, NULL, &gShadowMap2Texture)))
-	//{
-	//	gLastError = "Error creating shadow map texture";
-	//	return false;
-	//}
-
-	//// Create the depth stencil view, i.e. indicate that the texture just created is to be used as a depth buffer
-	// dsvDesc = {};
-	//dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // See "tech gotcha" above. The depth buffer sees each pixel as a "depth" float
-	//dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	//dsvDesc.Texture2D.MipSlice = 0;
-	//dsvDesc.Flags = 0;
-	//if (FAILED(gD3DDevice->CreateDepthStencilView(gShadowMap2Texture, &dsvDesc, &gShadowMap2DepthStencil)))
-	//{
-	//	gLastError = "Error creating shadow map depth stencil view";
-	//	return false;
-	//}
-
-
-	//// We also need to send this texture (resource) to the shaders. To do that we must create a shader-resource "view"
-	// srvDesc = {};
-	//srvDesc.Format = DXGI_FORMAT_R32_FLOAT; // See "tech gotcha" above. The shaders see textures as colours, so shadow map pixels are not seen as depths
-	//									   // but rather as "red" floats (one float taken from RGB). Although the shader code will use the value as a depth
-	//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	//srvDesc.Texture2D.MostDetailedMip = 0;
-	//srvDesc.Texture2D.MipLevels = 1;
-	//if (FAILED(gD3DDevice->CreateShaderResourceView(gShadowMap2Texture, &srvDesc, &gShadowMap2SRV)))
-	//{
-	//	gLastError = "Error creating shadow map shader resource view";
-	//	return false;
-	//}
-
-
-
- //   ///3
-
- //   // We also need a depth buffer to go with our portal
- //   textureDesc = {};
- //   textureDesc.Width = gShadowMapSize; // Size of the shadow map determines quality / resolution of shadows
- //   textureDesc.Height = gShadowMapSize;
- //   textureDesc.MipLevels = 1; // 1 level, means just the main texture, no additional mip-maps. Usually don't use mip-maps when rendering to textures (or we would have to render every level)
- //   textureDesc.ArraySize = 1;
- //   textureDesc.Format = DXGI_FORMAT_R32_TYPELESS; // The shadow map contains a single 32-bit value [tech gotcha: have to say typeless because depth buffer and shaders see things slightly differently]
- //   textureDesc.SampleDesc.Count = 1;
- //   textureDesc.SampleDesc.Quality = 0;
- //   textureDesc.Usage = D3D11_USAGE_DEFAULT;
- //   textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE; // Indicate we will use texture as a depth buffer and also pass it to shaders
- //   textureDesc.CPUAccessFlags = 0;
- //   textureDesc.MiscFlags = 0;
- //   if (FAILED(gD3DDevice->CreateTexture2D(&textureDesc, NULL, &gShadowMap3Texture)))
- //   {
- //       gLastError = "Error creating shadow map texture";
- //       return false;
- //   }
-
- //   // Create the depth stencil view, i.e. indicate that the texture just created is to be used as a depth buffer
- //   dsvDesc = {};
- //   dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // See "tech gotcha" above. The depth buffer sees each pixel as a "depth" float
- //   dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
- //   dsvDesc.Texture2D.MipSlice = 0;
- //   dsvDesc.Flags = 0;
- //   if (FAILED(gD3DDevice->CreateDepthStencilView(gShadowMap3Texture, &dsvDesc, &gShadowMap3DepthStencil)))
- //   {
- //       gLastError = "Error creating shadow map depth stencil view";
- //       return false;
- //   }
-
-
- //   // We also need to send this texture (resource) to the shaders. To do that we must create a shader-resource "view"
- //   srvDesc = {};
- //   srvDesc.Format = DXGI_FORMAT_R32_FLOAT; // See "tech gotcha" above. The shaders see textures as colours, so shadow map pixels are not seen as depths
- //                                          // but rather as "red" floats (one float taken from RGB). Although the shader code will use the value as a depth
- //   srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
- //   srvDesc.Texture2D.MostDetailedMip = 0;
- //   srvDesc.Texture2D.MipLevels = 1;
- //   if (FAILED(gD3DDevice->CreateShaderResourceView(gShadowMap2Texture, &srvDesc, &gShadowMap3SRV)))
- //   {
- //       gLastError = "Error creating shadow map shader resource view";
- //       return false;
- //   }
-
-
    //*****************************//
 
 
@@ -450,6 +364,8 @@ bool InitScene()
     gParallax = new Model(gParallaxMesh);
     gSpecular = new Model(gCubeMesh);
     gMul = new Model(gCubeMesh);
+    gAdd = new Model(gCubeMesh);
+    gCubeMap = new Model(gCubeMesh);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -467,8 +383,11 @@ bool InitScene()
     gParallax->SetScale(0.8f);
     gSpecular->SetPosition({-45,5,-5});
     gSpecular->SetRotation({ 0,380,0 });
-    gMul->SetPosition({ 13, 2, -5 });
-    gMul->SetScale(0.35f);
+    gMul->SetPosition({ 25, 5, -25 });
+    gMul->SetScale(0.7f);
+    gAdd->SetPosition({40, 21, 30});
+
+    gCubeMap->SetPosition({ 0, 5, -25 });
 
     
   
@@ -496,9 +415,9 @@ bool InitScene()
    
 
     gLights[2].colour = {0, 0, 0};
-    gLights[2].strength = 15;
+    gLights[2].strength = 25;
     gLights[2].model->SetPosition({ 40,25, 0 });
-    gLights[2].model->SetScale(pow(gLights[2].strength, 0.7f));
+    gLights[2].model->SetScale(pow(20, 0.7f));
     gLights[2].model->FaceTarget({ 0, 0, 0 });
 
 
@@ -507,6 +426,12 @@ bool InitScene()
     gLights[3].model->SetPosition({ -20, 10, 0 });
     gLights[3].model->SetScale(pow(20, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
     gLights[3].model->FaceTarget(gSpecular->Position());
+
+    gLights[4].colour = { 0.8f, 0.8f, 1.5f };
+    gLights[4].strength = 1;
+    gLights[4].model->SetPosition({ 25, 5, -25 });
+    gLights[4].model->SetScale(pow(10, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[4].model->FaceTarget({ 0, 0, 0 });
   
 
     //// Set up camera ////
@@ -564,6 +489,10 @@ void ReleaseResources()
     if (gSpecularDiffuseSpecularMap)        gSpecularDiffuseSpecularMap->Release();
     if (gMulDiffuseMapSRV)             gMulDiffuseMapSRV->Release();
     if (gMulDiffuseMap)                gMulDiffuseMap->Release();
+    if (gAddDiffuseMapSRV)             gAddDiffuseMapSRV->Release();
+    if (gAddDiffuseMap)                gAddDiffuseMap->Release();
+    if (gCubeMapDiffuseSpecularMapSRV)     gCubeMapDiffuseSpecularMapSRV->Release();
+    if (gCubeMapDiffuseSpecularMap)        gCubeMapDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -586,6 +515,8 @@ void ReleaseResources()
     delete gParallax;     gParallax = nullptr;
     delete gSpecular;     gSpecular = nullptr;
     delete gMul;     gMul = nullptr;
+    delete gAdd;     gAdd = nullptr;
+    delete gCubeMap;     gCubeMap = nullptr;
 
 
     delete gLightMesh;     gLightMesh     = nullptr;
@@ -640,7 +571,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gCubeNormal->Render();
     gParallax->Render();
     gSpecular->Render();
-   //gMul->Render();
+   
 }
 
 
@@ -690,6 +621,9 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gTeaPotDiffuseSpecularMapSRV);
     gTeaPot->Render();
 
+    gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
+    gCubeMap->Render();
+
 
     gD3DContext->VSSetShader(gSpecularVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gSpecularPixelShader, nullptr, 0);
@@ -736,13 +670,25 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gBlendingPixelShader, nullptr, 0);
     gD3DContext->PSSetShaderResources(0, 1, &gMulDiffuseMapSRV);
-    gD3DContext->PSSetSamplers(0, 1, &gTrilinearSampler);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
     gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
     gD3DContext->RSSetState(gCullNoneState);
 
     gMul->Render();
+
+
+    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gBlendingPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gAddDiffuseMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+
+    gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
+    gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
+    gD3DContext->RSSetState(gCullNoneState);
+
+    gAdd->Render();
 
     //// Render lights ////
 
@@ -752,7 +698,7 @@ void RenderSceneFromCamera(Camera* camera)
 
     // Select the texture and sampler to use in the pixel shader
     gD3DContext->PSSetShaderResources(0, 1, &gLightDiffuseMapSRV); // First parameter must match texture slot number in the shaer
-    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+   // gD3DContext->PSSetSamplers(0, 1, &gnosampler);
 
     gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
     gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
@@ -804,6 +750,14 @@ void RenderScene()
     gPerFrameConstants.light4CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
     gPerFrameConstants.light4ViewMatrix = CalculateLightViewMatrix(3);         // Calculate camera-like matrices for...
     gPerFrameConstants.light4ProjectionMatrix = CalculateLightProjectionMatrix(3);   //...lights to support shadow mapping
+
+
+    gPerFrameConstants.light5Colour = gLights[4].colour * gLights[3].strength;
+    gPerFrameConstants.light5Position = gLights[4].model->Position();
+    gPerFrameConstants.light5Facing = Normalise(gLights[4].model->WorldMatrix().GetZAxis());    // Additional lighting information for spotlights
+    gPerFrameConstants.light5CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
+    gPerFrameConstants.light5ViewMatrix = CalculateLightViewMatrix(4);         // Calculate camera-like matrices for...
+    gPerFrameConstants.light5ProjectionMatrix = CalculateLightProjectionMatrix(4);   //...lights to support shadow mapping
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;

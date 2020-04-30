@@ -142,11 +142,18 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 	float3 diffuseLight3 = (gLight3Colour * max(dot(input.worldNormal, light3Direction), 0)) / light3Distance;
 	halfway = normalize(light3Direction + cameraDirection);
 	float3 specularLight3 = gLight3Colour * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+	
+	//5
+    float3 light5Direction = normalize(gLight5Position - input.worldPosition);
+    float light5Distance = length(gLight5Position - input.worldPosition);
+    float3 diffuseLight5 = (gLight5Colour * max(dot(input.worldNormal, light5Direction), 0)) / light5Distance;
+    halfway = normalize(light3Direction + cameraDirection);
+    float3 specularLight5 = gLight5Colour * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
 
 
 	// Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)
-	float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2 + diffuseLight3;
-	float3 specularLight = specularLight1 + specularLight2 + specularLight3;
+	float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2 + diffuseLight3 + diffuseLight5;
+	float3 specularLight = specularLight1 + specularLight2 + specularLight3 + specularLight5;
 
 
 

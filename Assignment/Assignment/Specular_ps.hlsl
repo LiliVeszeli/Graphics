@@ -50,6 +50,10 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 
     halfway = normalize(light4Direction + cameraDirection);
     float3 specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+    
+    
+    
+
 
 
 

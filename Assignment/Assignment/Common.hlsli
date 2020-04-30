@@ -122,6 +122,15 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float gLight4CosHalfAngle;
     float4x4 gLight4ViewMatrix;
     float4x4 gLight4ProjectionMatrix;
+    
+    float3 gLight5Position;
+    float padding11;
+    float3 gLight5Colour;
+    float padding12;
+    float3   gLight5Facing;
+    float    gLight5CosHalfAngle;
+    float4x4 gLight5ViewMatrix;
+    float4x4 gLight5ProjectionMatrix;
 
     float3   gAmbientColour;
     float    gSpecularPower;

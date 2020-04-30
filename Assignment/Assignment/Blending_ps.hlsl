@@ -11,7 +11,7 @@ SamplerState TexSampler : register(s0);
 
 // Pixel shader entry point - each shader has a "main" function
 // This shader just samples diffuse texture map (with alpha)
-float4 main(SimplePixelShaderInput input) : SV_Target
+float4 main(LightingPixelShaderInput input) : SV_Target
 {
     float4 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv);
 
