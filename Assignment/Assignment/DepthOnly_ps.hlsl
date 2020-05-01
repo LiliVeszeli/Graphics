@@ -22,7 +22,4 @@ float4 main(SimplePixelShaderInput input) : SV_Target
 }
 
 
-// NOTE: The correct way to write a pixel shader that doesn't output a colour is this:
-// You can use this line when not interested in visualising the depth buffer.
-//     void main(SimplePixelShaderInput input) {}
-// If the depth buffer is enabled, this will output depth but no colour (C++ side render target should be nullptr)
+

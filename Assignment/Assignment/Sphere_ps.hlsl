@@ -8,6 +8,7 @@ SamplerState TexSampler : register(s0);
 
 float4 main(SimplePixelShaderInput input) : SV_Target
 {
+	//moves texture
 	input.uv.x += wiggle;
 	
 	

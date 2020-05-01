@@ -33,6 +33,7 @@ extern ID3D11PixelShader*  gSpecularPixelShader;
 extern ID3D11PixelShader* gBlendingPixelShader;
 extern ID3D11PixelShader* gAlphaTestingPixelShader;
 extern ID3D11PixelShader* gChangePixelShader;
+extern ID3D11PixelShader* gCubeMapPixelShader;
 
 //--------------------------------------------------------------------------------------
 // Shader creation / destruction

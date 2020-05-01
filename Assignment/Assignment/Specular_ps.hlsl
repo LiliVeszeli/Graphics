@@ -51,14 +51,9 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     halfway = normalize(light4Direction + cameraDirection);
     float3 specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
     
+
     
-    
-
-
-
-
-    // Sample diffuse material colour for this pixel from a texture using a given sampler that you set up in the C++ code
-    // Ignoring any alpha in the texture, just reading RGB
+    //sum the effects of lights
     float4 textureColour = DiffuseSpecularMap.Sample(TexSampler, input.uv);
     float3 diffuseMaterialColour = textureColour.rgb;
     float specularMaterialColour = textureColour.a;

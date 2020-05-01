@@ -59,13 +59,13 @@ Model* gSpecular;
 Model* gMul;
 Model* gAdd;
 Model* gAlphaTest;
-Model* gCubeMap;
+Model* gCubeMap; //:(
 Model* gSecret;
 Model* gChangeModel;
 
 Camera* gCamera;
-float wiggle;
-float change;
+float wiggle; //speed of the sphere wiggle
+float change; //speed of the texture changing
 float wiggleDirection = 1.0f;
 
 // Store lights in an array in this exercise
@@ -80,7 +80,7 @@ Light gLights[NUM_LIGHTS];
 
 
 // Additional light information
-CVector3 gAmbientColour = { 0.4f, 0.4f, 0.4f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
+CVector3 gAmbientColour = { 0.6f, 0.4f, 0.6f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
 float    gSpecularPower = 250.0f; // Specular power controls shininess - same for all models in this app
 
 ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
@@ -110,14 +110,6 @@ ID3D11Texture2D*          gShadowMap1Texture      = nullptr; // This object repr
 ID3D11DepthStencilView*   gShadowMap1DepthStencil = nullptr; // This object is used when we want to render to the texture above **as a depth buffer**
 ID3D11ShaderResourceView* gShadowMap1SRV          = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
 
-//ID3D11Texture2D*		  gShadowMap2Texture = nullptr; // This object represents the memory used by the texture on the GPU
-//ID3D11DepthStencilView*	  gShadowMap2DepthStencil = nullptr; // This object is used when we want to render to the texture above **as a depth buffer**
-//ID3D11ShaderResourceView* gShadowMap2SRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
-//
-//
-//ID3D11Texture2D* gShadowMap3Texture = nullptr; // This object represents the memory used by the texture on the GPU
-//ID3D11DepthStencilView* gShadowMap3DepthStencil = nullptr; // This object is used when we want to render to the texture above **as a depth buffer**
-//ID3D11ShaderResourceView* gShadowMap3SRV = nullptr;
 
 //*********************//
 
@@ -126,10 +118,7 @@ ID3D11ShaderResourceView* gShadowMap1SRV          = nullptr; // This object is u
 //--------------------------------------------------------------------------------------
 // Constant Buffers
 //--------------------------------------------------------------------------------------
-// Variables sent over to the GPU each frame
-// The structures are now in Common.h
-// IMPORTANT: Any new data you add in C++ code (CPU-side) is not automatically available to the GPU
-//            Anything the shaders need (per-frame or per-model) needs to be sent via a constant buffer
+
 
 PerFrameConstants gPerFrameConstants;      // The constants that need to be sent to the GPU each frame (see common.h for structure)
 ID3D11Buffer*     gPerFrameConstantBuffer; // The GPU buffer that will recieve the constants above
@@ -234,7 +223,7 @@ CMatrix4x4 CalculateLightProjectionMatrix(int lightIndex)
 bool InitGeometry()
 {
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
-    // IMPORTANT NOTE: Will only keep the first object from the mesh - multipart objects will have parts missing - see later lab for more robust loader
+   
     try 
     {
         gCharacterMesh = new Mesh("Troll.x");
@@ -397,14 +386,14 @@ bool InitScene()
     gSecret = new Model(gPortalMesh);
     gChangeModel = new Model(gCubeMeshNormal);
 
-	// Initial positions
-	gCharacter->SetPosition({ 15, 0, 0 });
+	// Initial positions, scalinG and rotation
+	gCharacter->SetPosition({ 20, 0, 0 });
     gCharacter->SetScale(6);
     gCharacter->SetRotation({ 0, ToRadians(215.0f), 0 });
 	gCrate-> SetPosition({ 40, 0, 30 });
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
-    gTeaPot->SetPosition({ 0, 0, 40 });
+    gTeaPot->SetPosition({ 10, 0, 40 });
     gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
     gCube->SetPosition({ -13, 5, 10 });
@@ -423,7 +412,7 @@ bool InitScene()
     gSecret->SetRotation({300, 0, 400});
     gChangeModel->SetPosition({ -55, 5, 45});
 
-    gCubeMap->SetPosition({ 0, 5, -25 });
+    gCubeMap->SetPosition({ -25, 5, -35 });
     gCubeMap->SetScale(0.4);
 
     
@@ -474,8 +463,8 @@ bool InitScene()
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 10, 30,-80 });
-    gCamera->SetRotation({ ToRadians(13), 0, 0 });
+    gCamera->SetPosition({ 20, 26,-80 });
+    gCamera->SetRotation({ ToRadians(10), ToRadians(-13), 0 });
 
     return true;
 }
@@ -489,14 +478,6 @@ void ReleaseResources()
     if (gShadowMap1DepthStencil)  gShadowMap1DepthStencil->Release();
     if (gShadowMap1SRV)           gShadowMap1SRV->Release();
     if (gShadowMap1Texture)       gShadowMap1Texture->Release();
-
-	/*if (gShadowMap2DepthStencil)  gShadowMap2DepthStencil->Release();
-	if (gShadowMap2SRV)           gShadowMap2SRV->Release();
-	if (gShadowMap2Texture)       gShadowMap2Texture->Release();
-
-    if (gShadowMap3DepthStencil)  gShadowMap3DepthStencil->Release();
-    if (gShadowMap3SRV)           gShadowMap3SRV->Release();
-    if (gShadowMap3Texture)       gShadowMap3Texture->Release();*/
 											
     if (gLightDiffuseMapSRV)             gLightDiffuseMapSRV->Release();
     if (gLightDiffuseMap)                gLightDiffuseMap->Release();
@@ -674,8 +655,7 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gTeaPotDiffuseSpecularMapSRV);
     gTeaPot->Render();
 
-    gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
-    gCubeMap->Render();
+   
 
    
     gD3DContext->PSSetShaderResources(0, 1, &gSecretDiffuseMapSRV);
@@ -734,6 +714,12 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     gChangeModel->Render();
+
+    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gCubeMapPixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
+    gCubeMap->Render();
+
 
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gAlphaTestingPixelShader, nullptr, 0);

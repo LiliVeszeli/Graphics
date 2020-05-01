@@ -73,5 +73,5 @@ float4 main(NormalMappingPixelShaderInput input) : SV_Target
     float3 finalColour = (gAmbientColour + diffuseLight1 + diffuseLight2) * diffuseMaterialColour +
                          (specularLight1 + specularLight2) * specularMaterialColour;
 
-    return float4(finalColour, 1.0f); // Always use 1.0f for alpha - no alpha blending in this lab
+    return float4(finalColour, 1.0f); 
 }

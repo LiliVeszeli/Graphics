@@ -18,8 +18,7 @@ Texture2D DiffuseSpecularMap : register(t0); // Textures here can contain a diff
 SamplerState TexSampler      : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
 
 Texture2D ShadowMapLight1 : register(t1); // Texture holding the view of the scene from a light
-//Texture2D ShadowMapLight2 : register(t2);
-//Texture2D ShadowMapLight3 : register(t3);
+
 
 SamplerState PointClamp   : register(s1); // No filtering for shadow maps (you might think you could use trilinear or similar, but it will filter light depths not the shadows cast...)
 
@@ -54,8 +53,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 	float3 light1Direction = normalize(gLight1Position - input.worldPosition);
 
 	// Check if pixel is within light cone
-	if (dot(gLight1Facing, -light1Direction) > gLight1CosHalfAngle) //**** TODO: This condition needs to be written as the first exercise to get spotlights working
-           //           As well as the variables above, you also will need values from the constant buffers in "common.hlsli"
+	if (dot(gLight1Facing, -light1Direction) > gLight1CosHalfAngle) 
 	{
 	    // Using the world position of the current pixel and the matrices of the light (as a camera), find the 2D position of the
 	    // pixel *as seen from the light*. Will use this to find which part of the shadow map to look at.
@@ -69,7 +67,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 		shadowMapUV.y = 1.0f - shadowMapUV.y;	// Check if pixel is within light cone
 
 		// Get depth of this pixel if it were visible from the light (another advanced projection step)
-		float depthFromLight = light1Projection.z / light1Projection.w; // -DepthAdjust; //*** Adjustment so polygons don't shadow themselves
+		float depthFromLight = light1Projection.z / light1Projection.w; 
 		
 		// Compare pixel depth from light with depth held in shadow map of the light. If shadow map depth is less than something is nearer
 		// to the light than this pixel - so the pixel gets no effect from this light
@@ -83,49 +81,6 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 
     }
 
-	// Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)
-	
-
-
-
-
-
-	//float3 diffuseLight2 = 0; // Initialy assume no contribution from this light
-	//float3 specularLight2 = 0;
-
-	//// Direction from pixel to light
-	//float3 light2Direction = normalize(gLight2Position - input.worldPosition);
-
-	//// Check if pixel is within light cone
-	//if (dot(gLight2Facing, -light2Direction) > gLight2CosHalfAngle) //**** TODO: This condition needs to be written as the first exercise to get spotlights working
-	//	   //           As well as the variables above, you also will need values from the constant buffers in "common.hlsli"
-	//{
-	//	// Using the world position of the current pixel and the matrices of the light (as a camera), find the 2D position of the
-	//	// pixel *as seen from the light*. Will use this to find which part of the shadow map to look at.
-	//	// These are the same as the view / projection matrix multiplies in a vertex shader (can improve performance by putting these lines in vertex shader)
-	//	float4 light2ViewPosition = mul(gLight2ViewMatrix, float4(input.worldPosition, 1.0f));
-	//	float4 light2Projection = mul(gLight2ProjectionMatrix, light2ViewPosition);
-
-	//	// Convert 2D pixel position as viewed from light into texture coordinates for shadow map - an advanced topic related to the projection step
-	//	// Detail: 2D position x & y get perspective divide, then converted from range -1->1 to UV range 0->1. Also flip V axis
-	//	float2 shadowMapUV = 0.5f * light2Projection.xy / light2Projection.w + float2(0.5f, 0.5f);
-	//	shadowMapUV.y = 1.0f - shadowMapUV.y;	// Check if pixel is within light cone
-
-	//	// Get depth of this pixel if it were visible from the light (another advanced projection step)
-	//	float depthFromLight = light2Projection.z / light2Projection.w; // -DepthAdjust; //*** Adjustment so polygons don't shadow themselves
-
-	//	// Compare pixel depth from light with depth held in shadow map of the light. If shadow map depth is less than something is nearer
-	//	// to the light than this pixel - so the pixel gets no effect from this light
-	//	if (depthFromLight < ShadowMapLight2.Sample(PointClamp, shadowMapUV).r)
-	//	{
-	//		float3 light2Dist = length(gLight2Position - input.worldPosition);
-	//		diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Dist; // Equations from lighting lecture
-	//		float3 halfway = normalize(light2Direction + cameraDirection);
-	//		specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower); // Multiplying by diffuseLight instead of light colour - my own personal preference
-	//	}
-
-
-	//}
 
 
 	///2
