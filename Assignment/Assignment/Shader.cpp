@@ -32,6 +32,7 @@ ID3D11VertexShader* gSpecularVertexShader = nullptr;
 ID3D11PixelShader*  gSpecularPixelShader = nullptr;
 ID3D11PixelShader* gBlendingPixelShader = nullptr;
 ID3D11PixelShader* gAlphaTestingPixelShader = nullptr;
+ID3D11PixelShader* gChangePixelShader = nullptr;
 
 
 
@@ -62,6 +63,7 @@ bool LoadShaders()
     gSpecularPixelShader = LoadPixelShader("Specular_ps");
     gBlendingPixelShader = LoadPixelShader("Blending_ps");
     gAlphaTestingPixelShader = LoadPixelShader("AlphaTesting_ps");
+    gChangePixelShader = LoadPixelShader("Change_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr || gDepthOnlyPixelShader == nullptr)
@@ -93,6 +95,7 @@ void ReleaseShaders()
     if (gSpecularPixelShader)   gSpecularPixelShader->Release();
     if (gBlendingPixelShader)   gBlendingPixelShader->Release();
     if (gAlphaTestingPixelShader)   gAlphaTestingPixelShader->Release();
+    if (gChangePixelShader)   gChangePixelShader->Release();
 }        
 
 

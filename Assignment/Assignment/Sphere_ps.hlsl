@@ -10,6 +10,7 @@ float4 main(SimplePixelShaderInput input) : SV_Target
 {
 	input.uv.x += wiggle;
 	
+	
 	float3 diffuseMapColour = DiffuseMap.Sample(TexSampler, input.uv).rgb;
 
     // Blend texture colour with fixed per-object colour

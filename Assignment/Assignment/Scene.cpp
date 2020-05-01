@@ -61,6 +61,7 @@ Model* gAdd;
 Model* gAlphaTest;
 Model* gCubeMap;
 Model* gSecret;
+Model* gChangeModel;
 
 Camera* gCamera;
 float wiggle;
@@ -79,7 +80,7 @@ Light gLights[NUM_LIGHTS];
 
 
 // Additional light information
-CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
+CVector3 gAmbientColour = { 0.4f, 0.4f, 0.4f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
 float    gSpecularPower = 250.0f; // Specular power controls shininess - same for all models in this app
 
 ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
@@ -191,6 +192,15 @@ ID3D11ShaderResourceView* gAlphaTestDiffuseMapSRV = nullptr;
 ID3D11Resource* gSecretDiffuseMap = nullptr;
 ID3D11ShaderResourceView* gSecretDiffuseMapSRV = nullptr;
 
+ID3D11Resource* gChange1DiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gChange1DiffuseSpecularMapSRV = nullptr;
+ID3D11Resource* gChange2DiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gChange2DiffuseSpecularMapSRV = nullptr;
+ID3D11Resource* gChangeNormalDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gChangeNormalDiffuseSpecularMapSRV = nullptr;
+ID3D11Resource* gChangeNormalMap = nullptr;
+ID3D11ShaderResourceView* gChangeNormalMapSRV = nullptr;
+
 
 ID3D11Resource* gCubeMapDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gCubeMapDiffuseSpecularMapSRV = nullptr;
@@ -289,7 +299,11 @@ bool InitGeometry()
         !LoadTexture("FireAdd.png", &gAddDiffuseMap, &gAddDiffuseMapSRV) ||
         !LoadTexture("wizard.png", &gAlphaTestDiffuseMap, &gAlphaTestDiffuseMapSRV) ||
         !LoadTexture("secret.png", &gSecretDiffuseMap, &gSecretDiffuseMapSRV) ||
-       // !LoadTexture("sunset.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
+        !LoadTexture("beach.dds", &gCubeMapDiffuseSpecularMap, &gCubeMapDiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternDiffuseSpecular.dds", &gChangeNormalDiffuseSpecularMap, &gChangeNormalDiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternDiffuseSpecular.dds", &gChange1DiffuseSpecularMap, &gChange1DiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternYellowDiffuseSpecular.dds", &gChange2DiffuseSpecularMap, &gChange2DiffuseSpecularMapSRV) ||
+        !LoadTexture("PatternNormal.dds", &gChangeNormalMap, &gChangeNormalMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -378,9 +392,10 @@ bool InitScene()
     gSpecular = new Model(gCubeMesh);
     gMul = new Model(gCubeMesh);
     gAdd = new Model(gCubeMesh);
-    gCubeMap = new Model(gCubeMesh);
+    gCubeMap = new Model(gSphereMesh);
     gAlphaTest = new Model(gCubeMesh);
     gSecret = new Model(gPortalMesh);
+    gChangeModel = new Model(gCubeMeshNormal);
 
 	// Initial positions
 	gCharacter->SetPosition({ 15, 0, 0 });
@@ -392,7 +407,7 @@ bool InitScene()
     gTeaPot->SetPosition({ 0, 0, 40 });
     gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
-    gCube->SetPosition({ -13, 5, -18 });
+    gCube->SetPosition({ -13, 5, 10 });
     gCubeNormal->SetPosition({ -40, 5, 45 });
     gParallax->SetPosition({ -24, 5, 40 });
     gParallax->SetScale(0.8f);
@@ -401,13 +416,15 @@ bool InitScene()
     gMul->SetPosition({ 25, 5, -25 });
     gMul->SetScale(0.7f);
     gAdd->SetPosition({40, 21, 30});
-    gAlphaTest->SetPosition({-29, 5.5f, -15});
+    gAlphaTest->SetPosition({-15, 5.5f, -25});
     gAlphaTest->SetScale(0.8f);
     gSecret->SetPosition({ 25, 2, -25 });
     gSecret->SetScale(0.1);
     gSecret->SetRotation({300, 0, 400});
+    gChangeModel->SetPosition({ -55, 5, 45});
 
     gCubeMap->SetPosition({ 0, 5, -25 });
+    gCubeMap->SetScale(0.4);
 
     
   
@@ -517,9 +534,17 @@ void ReleaseResources()
     if (gAlphaTestDiffuseMap)                gAlphaTestDiffuseMap->Release();
     if (gCubeMapDiffuseSpecularMapSRV)     gCubeMapDiffuseSpecularMapSRV->Release();
     if (gCubeMapDiffuseSpecularMap)        gCubeMapDiffuseSpecularMap->Release();
+    if (gChangeNormalMapSRV)            gChangeNormalMapSRV->Release();
+    if (gChangeNormalMap)               gChangeNormalMap->Release();
+    if (gChangeNormalDiffuseSpecularMapSRV)   gChangeNormalDiffuseSpecularMapSRV->Release();
+    if (gChangeNormalDiffuseSpecularMap)      gChangeNormalDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
+    if (gChange1DiffuseSpecularMapSRV)     gChange1DiffuseSpecularMapSRV->Release();
+    if (gChange1DiffuseSpecularMap)        gChange1DiffuseSpecularMap->Release();
+    if (gChange2DiffuseSpecularMapSRV)     gChange2DiffuseSpecularMapSRV->Release();
+    if (gChange2DiffuseSpecularMap)        gChange2DiffuseSpecularMap->Release();
 
     ReleaseShaders();
 
@@ -542,6 +567,7 @@ void ReleaseResources()
     delete gAdd;     gAdd = nullptr;
     delete gSecret;     gSecret = nullptr;
     delete gAlphaTest;     gAlphaTest = nullptr;
+    delete gChangeModel;     gChangeModel = nullptr;
     delete gCubeMap;     gCubeMap = nullptr;
 
 
@@ -597,6 +623,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gCubeNormal->Render();
     gParallax->Render();
     gSpecular->Render();
+    gChangeModel->Render();
    
 }
 
@@ -697,6 +724,17 @@ void RenderSceneFromCamera(Camera* camera)
     // Render model, sets world matrix, vertex and index buffer and calls Draw on the GPU
     gParallax->Render();
 
+
+    gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gChangePixelShader, nullptr, 0);
+    gD3DContext->PSSetShaderResources(0, 1, &gChangeNormalDiffuseSpecularMapSRV);
+    gD3DContext->PSSetShaderResources(1, 1, &gChangeNormalMapSRV);
+    gD3DContext->PSSetShaderResources(2, 1, &gChange1DiffuseSpecularMapSRV);
+    gD3DContext->PSSetShaderResources(3, 1, &gChange2DiffuseSpecularMapSRV);
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+
+    gChangeModel->Render();
+
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gAlphaTestingPixelShader, nullptr, 0);
     gD3DContext->OMSetBlendState(gNoBlendingState, nullptr, 0xffffff);
@@ -729,6 +767,8 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->RSSetState(gCullNoneState);
 
     gAdd->Render();
+
+
 
 
   
