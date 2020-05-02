@@ -15,7 +15,8 @@ SamplerState TexSampler : register(s0);
 float4 main(LightingPixelShaderInput input) : SV_Target
 {
 	
-	
+	float4 diffuseMap1 = DiffuseMap1.Sample(TexSampler, input.uv);
+	float4 diffuseMap2 = DiffuseMap2.Sample(TexSampler, input.uv);
 
 	
 	float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
@@ -57,13 +58,17 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 	////////////////////
 	// Combine lighting and textures
 
-    float4 diffuseMap1 = DiffuseMap1.Sample(TexSampler, input.uv);
-    float4 diffuseMap2 = DiffuseMap2.Sample(TexSampler, input.uv);
+    // Sample diffuse material and specular material colour for this pixel from a texture using a given sampler that you set up in the C++ code
+	//float4 textureColour = DiffuseMap2.Sample(TexSampler, input.uv);
+	//float3 diffuseMaterialColour = textureColour.rgb; // Diffuse material colour in texture RGB (base colour of model)
+	//float specularMaterialColour = textureColour.a; // Specular material colour in texture A (shininess of the surface)
+
 
     float4 finalTexture = lerp(diffuseMap1, diffuseMap2, change);
 	
+    // Blend texture colour with fixed per-object colour
 	float3 finalColour = diffuseLight * finalTexture.rgb + specularLight * finalTexture.a;
-	return float4(finalColour, 1.0f); 
+	return float4(finalColour, 1.0f); // Always use 1.0f for output alpha - no alpha blending in this lab
 
 	
 }

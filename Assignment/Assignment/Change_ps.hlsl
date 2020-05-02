@@ -1,7 +1,7 @@
 
 #include "Common.hlsli" // Shaders can also use include files - note the extension
 
-
+Texture2D DiffuseSpecularMap : register(t0); // Diffuse map (main colour) in rgb and specular map (shininess level) in alpha - C++ must load this into slot 0
 
 Texture2D NormalMap : register(t1); // Normal map in rgb - C++ must load this into slot 1
 
