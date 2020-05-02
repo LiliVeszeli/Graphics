@@ -69,7 +69,7 @@ float change; //speed of the texture changing
 float wiggleDirection = 1.0f;
 
 // Store lights in an array in this exercise
-const int NUM_LIGHTS = 5;
+const int NUM_LIGHTS = 6;
 struct Light
 {
     Model*   model;
@@ -393,7 +393,7 @@ bool InitScene()
 	gCrate-> SetPosition({ 40, 0, 30 });
 	gCrate-> SetScale(6);
 	gCrate-> SetRotation({ 0.0f, ToRadians(-20.0f), 0.0f });
-    gTeaPot->SetPosition({ 10, 0, 40 });
+    gTeaPot->SetPosition({ 6, 0, 40 });
     gSphere->SetPosition({ 10, 5, -30 });
     gSphere->SetScale(0.5f);
     gCube->SetPosition({ -13, 5, 10 });
@@ -412,8 +412,8 @@ bool InitScene()
     gSecret->SetRotation({300, 0, 400});
     gChangeModel->SetPosition({ -55, 5, 45});
 
-    gCubeMap->SetPosition({ -25, 5, -35 });
-    gCubeMap->SetScale(0.4);
+    gCubeMap->SetPosition({ -3, 5, -23 });
+    gCubeMap->SetScale(0.5);
 
     
   
@@ -441,7 +441,7 @@ bool InitScene()
    
 
     gLights[2].colour = {0, 0, 0};
-    gLights[2].strength = 25;
+    gLights[2].strength = 40;
     gLights[2].model->SetPosition({ 40,25, 0 });
     gLights[2].model->SetScale(pow(20, 0.7f));
     gLights[2].model->FaceTarget({ 0, 0, 0 });
@@ -454,10 +454,16 @@ bool InitScene()
     gLights[3].model->FaceTarget(gSpecular->Position());
 
     gLights[4].colour = { 0.8f, 0.8f, 1.5f };
-    gLights[4].strength = 1;
+    gLights[4].strength = 5;
     gLights[4].model->SetPosition({ 25, 5, -25 });
     gLights[4].model->SetScale(pow(10, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
     gLights[4].model->FaceTarget({ 0, 0, 0 });
+            
+    gLights[5].colour = { 0.8f, 0.8f, 1.5f };
+    gLights[5].strength = 35;
+    gLights[5].model->SetPosition({ -3, 15, -50 });
+    gLights[5].model->SetScale(pow(5, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[5].model->FaceTarget({ 0, 0, 0 });
   
 
     //// Set up camera ////
@@ -718,6 +724,7 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gCubeMapPixelShader, nullptr, 0);
     gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
+
     gCubeMap->Render();
 
 
@@ -821,12 +828,20 @@ void RenderScene()
     gPerFrameConstants.light4ProjectionMatrix = CalculateLightProjectionMatrix(3);   //...lights to support shadow mapping
 
 
-    gPerFrameConstants.light5Colour = gLights[4].colour * gLights[3].strength;
+    gPerFrameConstants.light5Colour = gLights[4].colour * gLights[4].strength;
     gPerFrameConstants.light5Position = gLights[4].model->Position();
     gPerFrameConstants.light5Facing = Normalise(gLights[4].model->WorldMatrix().GetZAxis());    // Additional lighting information for spotlights
     gPerFrameConstants.light5CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
     gPerFrameConstants.light5ViewMatrix = CalculateLightViewMatrix(4);         // Calculate camera-like matrices for...
     gPerFrameConstants.light5ProjectionMatrix = CalculateLightProjectionMatrix(4);   //...lights to support shadow mapping
+
+
+    gPerFrameConstants.light6Colour = gLights[5].colour * gLights[5].strength;
+    gPerFrameConstants.light6Position = gLights[5].model->Position();
+    gPerFrameConstants.light6Facing = Normalise(gLights[5].model->WorldMatrix().GetZAxis());    // Additional lighting information for spotlights
+    gPerFrameConstants.light6CosHalfAngle = cos(ToRadians(gSpotlightConeAngle / 2)); // --"--
+    gPerFrameConstants.light6ViewMatrix = CalculateLightViewMatrix(5);         // Calculate camera-like matrices for...
+    gPerFrameConstants.light6ProjectionMatrix = CalculateLightProjectionMatrix(5);   //...lights to support shadow mapping
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
@@ -940,7 +955,7 @@ void UpdateScene(float frameTime)
     }
 
 	// Control sphere (will update its world matrix)
-	//gCharacter->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	
     gAlphaTest->Control(frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
 
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
@@ -950,11 +965,13 @@ void UpdateScene(float frameTime)
 	gLights[0].model->FaceTarget(gCharacter->Position());
     gLights[3].model->SetPosition(gSpecular->Position() + CVector3{ cos(rotate) * gLightOrbit, 1, sin(rotate) * gLightOrbit });
     gLights[3].model->FaceTarget(gSpecular->Position());
+ 
+
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 
 
-       
+   //change colors for the light   
     r += dr;
     g += dg;
     b += db;
@@ -1000,6 +1017,9 @@ void UpdateScene(float frameTime)
      * Availability: https://stackoverflow.com/questions/11458552/cycle-r-g-b-vales-as-hue
      *************************************************/
 
+
+    //pulsate light
+
     if (strengthIsZero == false)
     {
         gLights[1].strength -= 0.1f;
@@ -1019,6 +1039,8 @@ void UpdateScene(float frameTime)
     {
         strengthIsZero = false;
     }
+
+
 
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
