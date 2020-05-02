@@ -59,9 +59,10 @@ Model* gSpecular;
 Model* gMul;
 Model* gAdd;
 Model* gAlphaTest;
-Model* gCubeMap; //:(
+Model* gCubeMap; //:)
 Model* gSecret;
 Model* gChangeModel;
+Model* gCell;
 
 Camera* gCamera;
 float wiggle; //speed of the sphere wiggle
@@ -88,6 +89,10 @@ ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
 // Variables controlling light1's orbiting of the cube
 const float gLightOrbit = 20.0f;
 const float gLightOrbitSpeed = 0.7f;
+
+// Cell shading data
+CVector3 OutlineColour = { 0, 0, 0 };
+float    OutlineThickness = 0.015f;
 
 // Spotlight data - using spotlights in this lab because shadow mapping needs to treat each light as a camera, which is easy with spotlights
 float gSpotlightConeAngle = 90.0f; // Spot light cone angle (degrees), like the FOV (field-of-view) of the spot light
@@ -194,6 +199,12 @@ ID3D11ShaderResourceView* gChangeNormalMapSRV = nullptr;
 ID3D11Resource* gCubeMapDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gCubeMapDiffuseSpecularMapSRV = nullptr;
 
+ID3D11Resource* gCellDiffuseMap = nullptr;
+ID3D11ShaderResourceView* gCellDiffuseMapSRV = nullptr;
+
+ID3D11Resource* gCellMap = nullptr;
+ID3D11ShaderResourceView* gCellMapSRV = nullptr;
+
 
 
 
@@ -293,6 +304,8 @@ bool InitGeometry()
         !LoadTexture("PatternDiffuseSpecular.dds", &gChange1DiffuseSpecularMap, &gChange1DiffuseSpecularMapSRV) ||
         !LoadTexture("PatternYellowDiffuseSpecular.dds", &gChange2DiffuseSpecularMap, &gChange2DiffuseSpecularMapSRV) ||
         !LoadTexture("PatternNormal.dds", &gChangeNormalMap, &gChangeNormalMapSRV) ||
+        !LoadTexture("Red.png", &gCellDiffuseMap, &gCellDiffuseMapSRV) ||
+        !LoadTexture("CellGradient.png", &gCellMap, &gCellMapSRV) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
@@ -385,6 +398,7 @@ bool InitScene()
     gAlphaTest = new Model(gCubeMesh);
     gSecret = new Model(gPortalMesh);
     gChangeModel = new Model(gCubeMeshNormal);
+    gCell = new Model(gTeaPotMesh);
 
 	// Initial positions, scalinG and rotation
 	gCharacter->SetPosition({ 20, 0, 0 });
@@ -411,6 +425,8 @@ bool InitScene()
     gSecret->SetScale(0.1);
     gSecret->SetRotation({300, 0, 400});
     gChangeModel->SetPosition({ -55, 5, 45});
+    gCell->SetPosition({45, 1, -13});
+    gCell->SetScale(0.8);
 
     gCubeMap->SetPosition({ -3, 5, -23 });
     gCubeMap->SetScale(0.5);
@@ -532,6 +548,10 @@ void ReleaseResources()
     if (gChange1DiffuseSpecularMap)        gChange1DiffuseSpecularMap->Release();
     if (gChange2DiffuseSpecularMapSRV)     gChange2DiffuseSpecularMapSRV->Release();
     if (gChange2DiffuseSpecularMap)        gChange2DiffuseSpecularMap->Release();
+    if (gCellMapSRV)           gCellMapSRV->Release();
+    if (gCellMap)              gCellMap->Release();
+    if (gCellDiffuseMapSRV)  gCellDiffuseMapSRV->Release();
+    if (gCellDiffuseMap)     gCellDiffuseMap->Release();
 
     ReleaseShaders();
 
@@ -556,6 +576,7 @@ void ReleaseResources()
     delete gAlphaTest;     gAlphaTest = nullptr;
     delete gChangeModel;     gChangeModel = nullptr;
     delete gCubeMap;     gCubeMap = nullptr;
+    delete gCell;     gCell = nullptr;
 
 
     delete gLightMesh;     gLightMesh     = nullptr;
@@ -611,6 +632,7 @@ void RenderDepthBufferFromLight(int lightIndex)
     gParallax->Render();
     gSpecular->Render();
     gChangeModel->Render();
+    gCell->Render();
    
 }
 
@@ -726,6 +748,47 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gCubeMapDiffuseSpecularMapSRV);
 
     gCubeMap->Render();
+
+
+    //cell shading
+     // Outline drawing - slightly scales object and draws black
+    gD3DContext->VSSetShader(gCellShadingOutlineVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gCellShadingOutlinePixelShader, nullptr, 0);
+
+    // States - no blending, normal depth buffer. However, use front culling to draw *inside* of model
+    gD3DContext->OMSetBlendState(gNoBlendingState, nullptr, 0xffffff);
+    gD3DContext->OMSetDepthStencilState(gUseDepthBufferState, 0);
+    gD3DContext->RSSetState(gCullFrontState);
+
+    // No textures needed, draws outline in plain colour
+
+    // Render models, no GPU changes needed between rendering them in this case
+    gCell->Render();
+   
+    //-------------------------------------------------------------------------
+
+    //// Render troll and teapot - second pass ////
+    // Draw models right way round, normal sized and with cell shading
+
+    // Main cell shading shaders
+    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+    gD3DContext->PSSetShader(gCellShadingPixelShader, nullptr, 0);
+
+    // Switch back to the usual back face culling (not inside out)
+    gD3DContext->RSSetState(gCullBackState);
+
+    // Select the troll texture and sampler
+    gD3DContext->PSSetShaderResources(0, 1, &gCellDiffuseMapSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+
+    // Also, cell shading uses a special 1D "cell map", which uses point sampling
+    gD3DContext->PSSetShaderResources(1, 1, &gCellMapSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetSamplers(1, 1, &gPointSampler);
+
+    // Render troll model
+    gCell->Render();
+
+
 
 
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
@@ -845,6 +908,8 @@ void RenderScene()
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
+    gPerFrameConstants.outlineColour = OutlineColour;
+    gPerFrameConstants.outlineThickness = OutlineThickness;
     gPerFrameConstants.cameraPosition = gCamera->Position();
 
     gPerFrameConstants.wiggle = wiggle;

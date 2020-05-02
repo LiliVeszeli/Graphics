@@ -34,6 +34,9 @@ ID3D11PixelShader* gBlendingPixelShader = nullptr;
 ID3D11PixelShader* gAlphaTestingPixelShader = nullptr;
 ID3D11PixelShader* gChangePixelShader = nullptr;
 ID3D11PixelShader* gCubeMapPixelShader = nullptr;
+ID3D11VertexShader* gCellShadingOutlineVertexShader = nullptr;
+ID3D11PixelShader* gCellShadingOutlinePixelShader = nullptr;
+ID3D11PixelShader* gCellShadingPixelShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -65,6 +68,9 @@ bool LoadShaders()
     gAlphaTestingPixelShader = LoadPixelShader("AlphaTesting_ps");
     gChangePixelShader = LoadPixelShader("Change_ps");
     gCubeMapPixelShader = LoadPixelShader("CubeMap_ps");
+    gCellShadingOutlineVertexShader = LoadVertexShader("CellShadingOutline_vs"); 
+    gCellShadingOutlinePixelShader = LoadPixelShader("CellShadingOutline_ps");
+    gCellShadingPixelShader = LoadPixelShader("CellShading_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr || gDepthOnlyPixelShader == nullptr)
@@ -98,6 +104,9 @@ void ReleaseShaders()
     if (gAlphaTestingPixelShader)   gAlphaTestingPixelShader->Release();
     if (gChangePixelShader)   gChangePixelShader->Release();
     if (gCubeMapPixelShader)   gCubeMapPixelShader->Release();
+    if (gCellShadingPixelShader)          gCellShadingPixelShader->Release();
+    if (gCellShadingOutlineVertexShader)  gCellShadingOutlineVertexShader->Release();
+    if (gCellShadingOutlinePixelShader)   gCellShadingOutlinePixelShader->Release();
 }        
 
 
