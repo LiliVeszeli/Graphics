@@ -189,8 +189,7 @@ bool CreateStates()
     blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;    // How to blend the destination (colour already on screen)
     blendDesc.RenderTarget[0].BlendOp   = D3D11_BLEND_OP_ADD; // How to combine the above two, almost always ADD
 
-    //** Leave the following settings alone, they are used only in highly unusual cases
-    //** Despite the word "Alpha" in the variable names, these are not the settings used for alpha blending
+
     blendDesc.RenderTarget[0].SrcBlendAlpha  = D3D11_BLEND_ONE;
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
     blendDesc.RenderTarget[0].BlendOpAlpha   = D3D11_BLEND_OP_ADD;
@@ -208,13 +207,12 @@ bool CreateStates()
     //multiplicative blending--------------------------------------------------------------
 
 
-    blendDesc.RenderTarget[0].BlendEnable = TRUE;              // additive blending
-    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_COLOR;      // How to blend the source (texture colour) - See lab notes
-    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;     // How to blend the destination (colour already on screen) - See lab notes
-    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;   // How to combine the above two, almost always ADD, leave this alone.
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;            
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_COLOR;    
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;   
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;   
 
-    //** Leave the following settings alone, they are used only in highly unusual cases
-    //** Despite the word "Alpha" in the variable names, these are not the settings used for alpha blending
+
     blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;

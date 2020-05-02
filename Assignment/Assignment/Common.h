@@ -106,6 +106,15 @@ struct PerFrameConstants
     CMatrix4x4 light5ViewMatrix;
     CMatrix4x4 light5ProjectionMatrix;
 
+    CVector3   light6Position;
+    float      padding13;
+    CVector3   light6Colour;
+    float      padding14;
+    CVector3   light6Facing;
+    float      light6CosHalfAngle;
+    CMatrix4x4 light6ViewMatrix;
+    CMatrix4x4 light6ProjectionMatrix;
+                    
 
     CVector3   ambientColour;
     float      specularPower;

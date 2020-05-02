@@ -1,8 +1,8 @@
 #include "Common.hlsli" // Shaders can also use include files - note the extension
 
 
-//Texture2D DiffuseSpecularMap : register(t0); // Diffuse map (main colour) in rgb and specular map (shininess level) in alpha - C++ must load this into slot 0
-TextureCube CubeMap: register(t0); // Normal map in rgb - C++ must load this into slot 1
+
+TextureCube CubeMap: register(t0); 
 SamplerState TexSampler : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic
 
 
@@ -12,13 +12,10 @@ SamplerState TexSampler : register(s0); // A sampler is a filter for a texture l
 
 float4 main(LightingPixelShaderInput input) : SV_Target
 {
-    //float3 vec = gCameraPosition - (float3)gWorldMatrix[3];
-	// Get the texture normal from the normal map. The r,g,b pixel values actually store x,y,z components of a normal. However, r,g,b
-	// values are stored in the range 0->1, whereas the x, y & z components should be in the range -1->1. So some scaling is needed
-    //float3 textureNormal = CubeMap.Sample(SkyboxSampler, input.worldPosition).rgb; // Scale from 0->1 to -1->1
-
     
-    float4 cubeTexture = CubeMap.Sample(TexSampler, input.worldPosition);
+   
+    
+    float4 cubeTexture = CubeMap.Sample(TexSampler, input.worldNormal);
 
 	///////////////////////
 	// Calculate lighting
@@ -37,18 +34,41 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 
 
     // Light 2
-    float3 light2Vector = gLight4Position - input.worldPosition;
+    float3 light2Vector = gLight2Position - input.worldPosition;
     float light2Distance = length(light2Vector);
     float3 light2Direction = light2Vector / light2Distance;
-    float3 diffuseLight2 = gLight4Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Distance;
+    float3 diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Distance;
 
     halfway = normalize(light2Direction + cameraDirection);
     float3 specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
-
-    float3 finalColour = (gAmbientColour + diffuseLight1+ diffuseLight2) * cubeTexture.rgb +
-                         (specularLight1+ specularLight2) * cubeTexture.a;
     
-   // float3 finalColour = cubeTexture.rgb;
+     // Light 3
+    float3 light3Vector = gLight3Position - input.worldPosition;
+    float light3Distance = length(light2Vector);
+    float3 light3Direction = light3Vector / light3Distance;
+    float3 diffuseLight3 = gLight3Colour * max(dot(input.worldNormal, light3Direction), 0) / light3Distance;
 
+    halfway = normalize(light3Direction + cameraDirection);
+    float3 specularLight3 = diffuseLight3 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+    
+     // Light 6
+    float3 light6Vector = gLight6Position - input.worldPosition;
+    float light6Distance = length(light6Vector);
+    float3 light6Direction = light6Vector / light6Distance; // Quicker than normalising as we have length for attenuation
+    float3 diffuseLight6 = gLight6Colour * max(dot(input.worldNormal, light6Direction), 0) / light6Distance;
+
+    halfway = normalize(light6Direction + cameraDirection);
+    float3 specularLight6 = diffuseLight6 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+    
+    
+    
+    
+
+  
+    //light calculation  
+    float3 finalColour = (gAmbientColour + diffuseLight1 + diffuseLight2 + diffuseLight3 + diffuseLight6) * cubeTexture.rgb +
+                         (specularLight1 + specularLight2 + specularLight3 + specularLight6) * cubeTexture.a;
+    
+   
     return float4(finalColour, 1.0f);
 }
