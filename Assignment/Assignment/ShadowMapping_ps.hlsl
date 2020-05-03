@@ -74,11 +74,10 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 		if (depthFromLight < ShadowMapLight1.Sample(PointClamp, shadowMapUV).r)
 		{
             float3 light1Dist = length(gLight1Position - input.worldPosition);
-            diffuseLight1 = gLight1Colour * max(dot(input.worldNormal, light1Direction), 0) / light1Dist; // Equations from lighting lecture
+            diffuseLight1 = gLight1Colour * max(dot(input.worldNormal, light1Direction), 0) / light1Dist; 
             float3 halfway = normalize(light1Direction + cameraDirection);
             specularLight1 =  diffuseLight1 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower); // Multiplying by diffuseLight instead of light colour - my own personal preference
         }
-
     }
 
 
@@ -110,10 +109,6 @@ float4 main(LightingPixelShaderInput input) : SV_Target
 	float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2 + diffuseLight3 + diffuseLight5;
 	float3 specularLight = specularLight1 + specularLight2 + specularLight3 + specularLight5;
 
-
-
-
-
 	////////////////////
 	// Combine lighting and textures
 
@@ -125,5 +120,5 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     // Combine lighting with texture colours
     float3 finalColour = diffuseLight  * diffuseMaterialColour + specularLight * specularMaterialColour;
 
-    return float4(finalColour, 1.0f); // Always use 1.0f for output alpha - no alpha blending in this lab
+    return float4(finalColour, 1.0f);
 }

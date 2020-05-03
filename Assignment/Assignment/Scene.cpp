@@ -1,3 +1,5 @@
+//Lili Veszeli
+
 //--------------------------------------------------------------------------------------
 // Scene geometry and layout preparation
 // Scene rendering & update
@@ -466,19 +468,19 @@ bool InitScene()
     gLights[3].colour = { 0.8f, 0.8f, 1.0f };
     gLights[3].strength = 10;
     gLights[3].model->SetPosition({ -20, 10, 0 });
-    gLights[3].model->SetScale(pow(20, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[3].model->SetScale(pow(20, 0.7f));
     gLights[3].model->FaceTarget(gSpecular->Position());
 
     gLights[4].colour = { 0.8f, 0.8f, 1.5f };
-    gLights[4].strength = 5;
+    gLights[4].strength = 10;
     gLights[4].model->SetPosition({ 25, 5, -25 });
-    gLights[4].model->SetScale(pow(10, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[4].model->SetScale(pow(10, 0.7f)); 
     gLights[4].model->FaceTarget({ 0, 0, 0 });
             
     gLights[5].colour = { 0.8f, 0.8f, 1.5f };
     gLights[5].strength = 35;
     gLights[5].model->SetPosition({ -3, 15, -50 });
-    gLights[5].model->SetScale(pow(5, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[5].model->SetScale(pow(5, 0.7f)); 
     gLights[5].model->FaceTarget({ 0, 0, 0 });
   
 
